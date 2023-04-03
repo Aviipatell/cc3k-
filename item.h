@@ -7,3 +7,5 @@ class Item: public Entity {
 public:
     virtual void useItem() = 0;
 };
+
+#endif

@@ -11,3 +11,5 @@ public:
     void setDragon(Dragon *d);
     void destroyDragon();
 };
+
+#endif
