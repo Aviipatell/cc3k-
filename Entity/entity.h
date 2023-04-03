@@ -7,7 +7,7 @@ class Entity {
     Cell *c;
 public:
     Entity();
-    ~Entity() delete c;
+    ~Entity();
 
     Cell getCell();
 
