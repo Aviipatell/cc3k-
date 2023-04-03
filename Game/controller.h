@@ -11,3 +11,5 @@ public:
     void quitGame();
     void print();
 };
+
+#endif

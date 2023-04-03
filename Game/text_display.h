@@ -8,3 +8,5 @@ class TextDisplay {
 public:
     void printGrid();
 };
+
+#endif

@@ -33,3 +33,5 @@ public:
     void printGame();
     bool isValidCell(Direction dir);
 };
+
+#endif
