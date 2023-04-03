@@ -20,3 +20,5 @@ public:
     bool getIsKnownPotion();
     void setIsKnownPotion(bool b);
 };
+
+#endif

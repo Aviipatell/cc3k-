@@ -7,3 +7,5 @@ class BarrierSuit: public ProtectedItem {
 public:
     void useItem() override;
 };
+
+#endif

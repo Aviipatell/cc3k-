@@ -10,3 +10,5 @@ class Gold: public Item {
 public:
     void useItem() override;
 };
+
+#endif
