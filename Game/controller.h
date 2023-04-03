@@ -6,6 +6,7 @@ class Game;
 class Controller {
     Game *g;
 public:
+    Controller();
     void startGame(char race);
     void restartGame(char race);
     void quitGame();

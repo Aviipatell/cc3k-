@@ -28,7 +28,9 @@ class Game: public Controller {
     std::vector<Item *> items;
     std::vector<Enemy *> enemies;
     TextDisplay *td;
+    bool merchantHostile;
 public:
+    Game();
     void generateFloor(Player *p);
     void printGame();
     bool isValidCell(Direction dir);
