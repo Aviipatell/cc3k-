@@ -18,6 +18,8 @@ public:
     void setAttackPoints(int val);
     void setDefencePoints(int val);
     void setRace(std::string race);
+
+    bool isAlive();
 };
 
 #endif

@@ -6,6 +6,10 @@ class Entity;
 class Item: public Entity {
 public:
     virtual void useItem() = 0;
+
+    bool isPotion();
+    bool isGold();
+    bool isProtected();
 };
 
 #endif
