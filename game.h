@@ -49,13 +49,19 @@ public:
 
 // have a private field that stores the games current action/state.
 
+// have a private isOver boolean field that keeps track whether or not the game is over (ie: player has died or player has finished all 5 levels).
+
 // ***** METHODS ****
 
 // Game::Game(race, isTesting, floorPlanSrc)
 // -> assign values, set initial floor level to 1
 // -> call generateFloor()
 
-// Game::generateFloor():
+// Game::generateNewFloor():
+// -> if currentLevel > 5, call a function that prints cleared dungeon graphic + final player stats + final player score (and then possibly a leaderboard or something). set Game::isOver = true. then, break out of this function and let control flow resume back to controller which will call Game::isFinished() which will be true because currentLevel > 5, and thus will prompt user whether they want to quit or restart.
+// -> if enemies != null, destroy all enemies.
+// -> if items != null, destroy all items.
+// -> stairsVisible to false.
 // -> open filestream with floorPlanSrc
 // -> getUpper + lowerBound (calculation with curFloorLevel)
 // -> if isTesting:
@@ -82,6 +88,7 @@ public:
     // -> check for any dragon hoards. for each dragon hoard, spawn dragon + decrement enemies needed to spawn
     // -> spawn remaining enemies
     // -> randomly choose one enemy to hold the compass
+// -> close filestream with floorPlanSrc?
 
 // Game::attack(dir1, dir2):
 // -> get player's position, and the intended square to attack. Call Cell::getType() which should be of type Enemy in this case (modify FloorType enum).
@@ -99,14 +106,24 @@ public:
 // Game::move(dir1, dir2):
 // -> check if Cell::getType = a valid cell to move into (ie: not occupied by an enemy, wall, or item)
     // -> if not valid, run Game::moveEnemies() and print quirky informative msg, ie: you ran into a wall
-    // -> else, move player in the specified direction. Then, check neighbours to see if there are any items surrounding you, ie: potion, enemy, etc. If so, add that to informative action msg. Then, run moveEnemies() and add to the informative action msg if necessary.
+    // -> else:
+        // -> check if Cell::getType == stairCase. if so, move player in specified direction. Then, run generateNewFloor() + set informative action statement.
+        // -> otherwise, move player in the specified direction. Then, check neighbours to see if there are any items surrounding you, ie: potion, enemy, etc. If so, add that to informative action msg. Then, run moveEnemies() and add to the informative action msg if necessary.
         // handle known potion logic in Move, since when use any potion P, it will always state potion name
 
 // Game::moveEnemies():
 // -> recurse through grid from top left to bottom right. everytime you encounter an enemy:
     // -> check if Enemy is dragon. if so, check if the item it is protected has player as neighbour. if so, attack said player. else, do not move dragon. move on to process next enemy
     // -> if enemy not dragon, check if there is a player in the vicinity.
-        // -> if player is neighbour, attack player. add on to the informative message. also
+        // -> if player is neighbour, attack player. add on to the informative message. if Player::isDead, call a function that brings a 'You died' graphic + final player stats (no final player score is generated in this case. they just lose according to program specifications). then, set Game::isOver to true, which will then be detected via Game::isFinished() method in controller
         // -> if no player is neighbour, randomly choose a valid direction it can move to.
     // then, set hasMoved = true and continue to process our next enemy.
     // -> once all enemies have been 'moved', recurse through enemies vector and set hasBeenMoved to false so that they can all be moved during our next turn.
+
+// Game::getIsOver():
+// -> returns Game::isOver boolean value
+
+// NOTE: every time a cell is set to have a different value or something, run notifyObservers() to inform the observing textdisplay to also update its grid for that specific cell.
+// -> OR, drop TextDisplay all together and just overload the Game output operator to properly print the floor with player stats + action
+
+// SIDE NOTE: think we should definitely set up inventory system, which we will use to store up to 3 potions and 2 weapons (apart from simply punching/kicking enemies.) ie: a weapon can be equipped, unequipped, dropped and picked up (but once you drop a weapon, it's gone.) Potions can also be stored, dropped, and used. Potions stored in your inventory are carried with you throughout subsequent floors/levels.

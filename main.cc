@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
             // print game
         }
 
-        if (c.getIsFinished()) {
+        if (c.isGameOver()) {
             std::cout << "Would you like to:\n(r) restart?\n(q) quit?" << std::endl;
             std::cin >> cmd;
             // add validity check

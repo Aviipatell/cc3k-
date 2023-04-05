@@ -34,8 +34,8 @@ public:
 // Controller::print()
 // -> call Game::printGame(), which prints g.td and additional information
 
-// Controller::getIsFinished()
-// -> returns Game::isFinished()
+// Controller::isGameOver()
+// -> returns Game::getIsOver()
 
 // Controller::playerAction(char dir1, char dir2, char actionType = 0)
 // -> check valid direction:
