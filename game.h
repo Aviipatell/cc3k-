@@ -27,7 +27,7 @@ class Game {
     int level;
     std::vector<Item *> items;
     std::vector<Enemy *> enemies;
-    TextDisplay *td;
+    // TextDisplay *td;
     bool merchantHostile;
 public:
     Game();
@@ -38,12 +38,18 @@ public:
 
 #endif
 
+// ***** FIELDS ******
+
 // consider generateEnemy(char type) and generateItem(char type)
 
 // have private field called BarrierSuitFloor, number from 1-5.
 // -> when curLevel == BarrierSuitFloor, when generatingItems, generate barrier suit + protect it with a dragon (and so, decrement enemies)
 
 // Game also has a private field, stairsVisible. Upon floor generation, this is reset to false. Upon acquiring compass, this is set to true.
+
+// have a private field that stores the games current action/state.
+
+// ***** METHODS ****
 
 // Game::Game(race, isTesting, floorPlanSrc)
 // -> assign values, set initial floor level to 1
@@ -77,4 +83,30 @@ public:
     // -> spawn remaining enemies
     // -> randomly choose one enemy to hold the compass
 
-    
+// Game::attack(dir1, dir2):
+// -> get player's position, and the intended square to attack. Call Cell::getType() which should be of type Enemy in this case (modify FloorType enum).
+// -> if Cell::getType() != Enemy:
+    // -> attack pretty much fails, rest of the game characters get updated. quirky msg added to Game's action field and then exit function
+    // -> else, run p.attackEnemy(Cell::getEntity()? or cast that to an Enemy?) and print out information regarding the attack. run p.attackEnemy and then Game::moveEnemies(), and then set the informative action message, followed by exiting to then inevitably be printed.
+
+// Game::usePotion(dir1, dir2):
+// -> get player's position, and the intended square to use potion.
+// -> if Cell::getType() != Potion:
+    // -> use potion pretty much fails, rest of the game characters are updated. quirky msg added to Game's action field and then exit function
+    // -> p = new StatusEffect{p}, where StatusEffect is replaced by the specific type of statusEffect inflicted to given player.
+    // -> then, run Game::moveEnemies(), and then set the informative action message, followed by exiting to then inevitably printing out the board again
+
+// Game::move(dir1, dir2):
+// -> check if Cell::getType = a valid cell to move into (ie: not occupied by an enemy, wall, or item)
+    // -> if not valid, run Game::moveEnemies() and print quirky informative msg, ie: you ran into a wall
+    // -> else, move player in the specified direction. Then, check neighbours to see if there are any items surrounding you, ie: potion, enemy, etc. If so, add that to informative action msg. Then, run moveEnemies() and add to the informative action msg if necessary.
+        // handle known potion logic in Move, since when use any potion P, it will always state potion name
+
+// Game::moveEnemies():
+// -> recurse through grid from top left to bottom right. everytime you encounter an enemy:
+    // -> check if Enemy is dragon. if so, check if the item it is protected has player as neighbour. if so, attack said player. else, do not move dragon. move on to process next enemy
+    // -> if enemy not dragon, check if there is a player in the vicinity.
+        // -> if player is neighbour, attack player. add on to the informative message. also
+        // -> if no player is neighbour, randomly choose a valid direction it can move to.
+    // then, set hasMoved = true and continue to process our next enemy.
+    // -> once all enemies have been 'moved', recurse through enemies vector and set hasBeenMoved to false so that they can all be moved during our next turn.
