@@ -101,6 +101,7 @@ public:
 // -> if Cell::getType() != Potion:
     // -> use potion pretty much fails, rest of the game characters are updated. quirky msg added to Game's action field and then exit function
     // -> p = new StatusEffect{p}, where StatusEffect is replaced by the specific type of statusEffect inflicted to given player.
+    // -> check if Player::isDead, since there is a chance they drank a poison potion which took their HP down to 0. If so, call the function that brings a 'You died.' graphic, + final player stats + message. Then, set Game::isOver to true, which will then be detected via Game::isFinished() method in controller.
     // -> then, run Game::moveEnemies(), and then set the informative action message, followed by exiting to then inevitably printing out the board again
 
 // Game::move(dir1, dir2):
