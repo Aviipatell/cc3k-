@@ -4,7 +4,7 @@
 class Cell;
 
 class Entity {
-    Cell *c;
+    Cell* c;
 public:
     Entity();
     ~Entity();

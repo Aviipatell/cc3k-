@@ -2,6 +2,7 @@
 #define __GAME_H_
 
 #include <vector>
+#include <string>
 
 enum Direction {
     no,
@@ -19,21 +20,37 @@ class Cell;
 class Item;
 class Cell;
 class Enemy;
+class TestDisplay;
 
 class Game {
     Player *p;
-    std::vector<std::vector<Cell *>> floor;
+    std::vector<std::vector<Cell*>> floor;
+    std::vector<Enemy*> enemies;
+    std::vector<Item*> items;
+    std::string gameAction;
 
-    int level;
-    std::vector<Item *> items;
-    std::vector<Enemy *> enemies;
-    // TextDisplay *td;
-    bool merchantHostile;
-public:
-    Game();
-    void generateFloor(Player *p);
-    void printGame();
-    bool isValidCell(Direction dir);
+    int currentFloor;
+    int barrierSuitFloor;
+    bool isStairsVisible;
+    bool isMerchantHostile;
+    bool isOver;
+
+    TestDisplay* td;
+
+    public:
+
+        Game(char race, bool isTesting, std::string floorPlanSrc);
+        void generateNewFloor();
+        void generateEnemy(char type = 0);
+        void generateItem(char type = 0);
+
+        void attack(char dir1, char dir2);
+        void usePotion(char dir1, char dir2);
+        void movePlayer(char dir1, char dir2);
+        void moveEnemies();
+        bool isFinished();
+
+        void print();
 };
 
 #endif
@@ -55,6 +72,7 @@ public:
 
 // Game::Game(race, isTesting, floorPlanSrc)
 // -> assign values, set initial floor level to 1
+// -> use race to init player
 // -> call generateFloor()
 
 // Game::generateNewFloor():

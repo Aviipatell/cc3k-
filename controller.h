@@ -1,21 +1,36 @@
-#ifndef __CONTROLLER_H_
-#define __CONTROLLER_H_
+#ifndef _CONTROLLER_H_
+#define _CONTROLLER_H_
+
+#include "string"
 
 class Game;
 
 class Controller {
     Game *g;
-public:
-    Controller(); // idk if this does anything
-    void startGame(char race, bool isTesting);
-    bool playerAction(char dir1, char dir2, char actionType = 0);
-    void restartGame(char race);
-    void quitGame();
-    void print();
+    bool isTesting;
+    std::string floorPlanSrc;
+    std::string msg;
+    public:
+        Controller(bool isTesting, std::string floorPlanSrc);
+        void startGame();
+        void restartGame();
+        void quitGame();
+        void printGame();
+
+        bool playerAction(char dir1, char dir2, char actionType = 0);
+        bool isGameOver();
+
+        std::string getMsg();
 };
 
 #endif
 
+// ***** FIELDS ****
+
+// -> probably add isTesting and floorPlanSrc here to clean up main a bit.
+// -> as a result, Controller constructor will be passed in those two values
+
+ // **** METHODS ****
 
 // Controller(bool isTesting) : isTesting{isTesting}
 
@@ -31,7 +46,7 @@ public:
 // Controller::quitGame()
 // -> delete g
 
-// Controller::print()
+// Controller::printGame()
 // -> call Game::printGame(), which prints g.td and additional information
 
 // Controller::isGameOver()
@@ -46,5 +61,5 @@ public:
 // -> if actionType == 'u':
     // -> g.usePotion(dir1, dir2)
 // else
-    // -> g.move(dir1, dir2)
+    // -> g.movePlayer(dir1, dir2)
 // -> return true;

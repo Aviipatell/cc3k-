@@ -11,39 +11,46 @@ int main(int argc, char* argv[]) {
         floorPlanSrc = argv[1];
     }
 
-    // initialize controller w/ isTesting param
-    Controller c;
-    c.startGame(isTesting, floorPlanSrc); // maybe swap for private fields in Controller to keep track
+    // initialize controller with isTesting param + floorPlanSrc
+    Controller c {isTesting, floorPlanSrc};
+    c.startGame();
 
-    // GAME LOOP --------------------
-
+    // game loop
     while(true) {
-
         char cmd;
         bool isValidMove = false;
         std::cin >> cmd;
 
         if (cmd == 'r') {
-            c.restartGame(isTesting, floorPlanSrc);
+            c.restartGame();
         } else if (cmd == 'q') {
             c.quitGame();
             break;
         } else if (cmd == 'a' || cmd =='u') {
             char dir1, dir2;
+            std::cin >> dir1;
+            std::cin >> dir2;
             isValidMove = c.playerAction(dir1, dir2, cmd);
         } else {
             char dir2;
+            std::cin >> dir2;
             isValidMove = c.playerAction(cmd, dir2);
         }
 
-        if (isValidMove) {
-            // print game
+        if (!isValidMove) {
+            std::cout << c.getMsg();
+            continue;
+        } else {
+            c.printGame();
         }
 
         if (c.isGameOver()) {
             std::cout << "Would you like to:\n(r) restart?\n(q) quit?" << std::endl;
             std::cin >> cmd;
-            // add validity check
+            while (!(cmd == 'r' || cmd == 'q')) {
+                std::cout << "Invalid input. Would you like to:\n(r) restart?\n(q) quit?" << std::endl;
+                std::cin >> cmd;
+            }
             if (cmd == 'r') {
                 c.restartGame();
             } else {
@@ -53,7 +60,6 @@ int main(int argc, char* argv[]) {
         }
 
     }
-
 }
 
 
