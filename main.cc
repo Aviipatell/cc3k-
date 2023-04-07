@@ -4,15 +4,34 @@
 int main(int argc, char* argv[]) {
 
     bool isTesting = false;
-    std::string floorPlanSrc = "FloorPlans/standard.txt";
+    std::string floorPlanSrc;
+    bool isSeeded = false;
+    unsigned seed;
 
-    if (argc == 2) {
+    if (argc == 3) {
         isTesting = true;
         floorPlanSrc = argv[1];
+        isSeeded = true;
+        std::string seedStr = argv[2];
+        seed = std::stoi(seedStr);
+    } else if (argc == 2) {
+        std::string seedStr = argv[1];
+        try {
+            seed = std::stoi(seedStr);
+            isSeeded = true;
+        } catch(std::invalid_argument) {
+            isTesting = true;
+            floorPlanSrc = argv[1];
+        }
     }
 
+    // if (argc == 2) {
+    //     isTesting = true;
+    //     floorPlanSrc = argv[1];
+    // }
+
     // initialize controller with isTesting param + floorPlanSrc
-    Controller c {isTesting, floorPlanSrc};
+    Controller c {isTesting, floorPlanSrc, isSeeded, seed};
     c.startGame();
 
     // game loop

@@ -16,9 +16,12 @@ class Player: public Character {
         int getPlayerGold() const;
         int setPlayerGold(int val);
 
+        // we'll keep this attack function as a virtual to enable type based attacking in the future.
         virtual void attack(Enemy& e) = 0;
         // have virtual inventory/weapon related methods, since race will have specific perks.
 };
+
+
 
 /*
 public:

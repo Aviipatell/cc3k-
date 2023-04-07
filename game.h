@@ -3,6 +3,10 @@
 
 #include <vector>
 #include <string>
+#include <random>
+#include <iostream>
+#include <fstream>
+#include <sstream>
 
 enum Direction {
     no,
@@ -22,6 +26,16 @@ class Cell;
 class Enemy;
 class TestDisplay;
 
+// see if we can use this anywhere as a single source of truth
+enum PlayerRaces {
+    Human=0,
+    Dwarf,
+    Elf,
+    Orc,
+    BonusRace1,
+    BonusRace2
+};
+
 class Game {
     Player *p;
     std::vector<std::vector<Cell*>> floor;
@@ -29,20 +43,31 @@ class Game {
     std::vector<Item*> items;
     std::string gameAction;
 
-    int currentFloor;
+    // will get incremented everytime generateNewFloor is ran?
+    int currentFloor = 0;
     int barrierSuitFloor;
-    bool isStairsVisible;
-    bool isMerchantHostile;
-    bool isOver;
+    bool isStairsVisible = false;
+    bool isMerchantHostile = false;
+    bool isOver = false;
+
+    bool isTesting;
+    std::string floorPlanSrc;
+    bool DLC;
+
+    std::default_random_engine& rng;
+
 
     TestDisplay* td;
 
     public:
 
-        Game(char race, bool isTesting, std::string floorPlanSrc);
+        Game(int raceSelect, bool DLCSelect, bool isTesting, std::string floorPlanSrc, std::default_random_engine& rng);
         void generateNewFloor();
+        Player* generatePlayer(int raceSelect);
         void generateEnemy(char type = 0);
         void generateItem(char type = 0);
+
+        void removeFloorEntities();
 
         void attack(char dir1, char dir2);
         void usePotion(char dir1, char dir2);
