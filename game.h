@@ -1,5 +1,5 @@
-#ifndef __GAME_H_
-#define __GAME_H_
+#ifndef _GAME_H_
+#define _GAME_H_
 
 #include <vector>
 #include <string>
@@ -70,6 +70,9 @@ class Game {
         void assignChambers(Cell* c, std::vector<int>& chambers);
         // void mergeChambers(std::vector<std::vector<Position>>& chambers);
         int getUnsetChamber(std::vector<int>& chambers);
+        void loadFloorFromFile();
+        std::vector<Cell*> getEmptyCellsFromChamber(std::vector<Cell*> cells, int chamber);
+
 
         void attack(char dir1, char dir2);
         void usePotion(char dir1, char dir2);

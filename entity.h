@@ -7,14 +7,13 @@ class Entity {
     Cell* c;
 public:
     Entity();
-    ~Entity();
+    virtual ~Entity() = 0; // make entity abstract
 
-    Cell getCell();
-
+    Cell* getCell();
     void setCell(Cell *c);
-    void swapCells(Cell *c);
+    void swapCell(Cell *c);
 
-    // what are there for?
+    // what are these for?
     bool isPlayer();
     bool isEnemy();
     bool isItem();

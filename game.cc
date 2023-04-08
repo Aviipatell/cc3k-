@@ -25,7 +25,6 @@ Game::Game(int raceSelect, bool DLCSelect, bool isTesting, std::string floorPlan
 void Game::generateNewFloor(){
 
     ++currentFloor;
-
     if (currentFloor > 5) {
         std::cout << "You win." << std::endl; // TODO: remove, this is just temporary
         isOver = true;
@@ -35,6 +34,216 @@ void Game::generateNewFloor(){
     removeFloorEntities();
     isStairsVisible = false;
 
+    loadFloorFromFile();
+
+    // If not testing, proceed to generate + set all required entities
+    if (!isTesting) {
+        int index;
+        std::vector<Cell*> cells;
+        std::vector<Cell*> chamberCells;
+        for (int row = 0; row < floor.size(); ++row) {
+            for (int column = 0; column < floor[row].size(); ++column) {
+                if (floor[row][column]->getType() == FloorType::tile) {
+                    cells.push_back(floor[row][column]);
+                }
+            }
+        }
+
+        // Generate player with equal probability
+        std::uniform_int_distribution<unsigned> selectChamber(1, 5);
+        int playerChamber = selectChamber(rng);
+        chamberCells = getEmptyCellsFromChamber(cells, playerChamber);
+        // NOTE: no need for this while block below..
+        while (chamberCells.size() == 0) {
+            playerChamber = selectPlayerChamber(rng);
+            chamberCells = getEmptyCellsFromChamber(cells, playerChamber);
+        }
+        std::uniform_int_distribution<unsigned> selectPlayerCell(0, chamberCells.size()-1);
+        index = selectPlayerCell(rng);
+        p->setCell(cells[index]);
+        cells[index]->setEntity(p);
+        // remove player cell from vector of available cells
+        cells.erase(cells.begin() + index); // should not delete the actual cell
+
+        // Generate staircase with equal probability
+        int stairCaseChamber = selectChamber(rng);
+        chamberCells = getEmptyCellsFromChamber(cells, stairCaseChamber);
+        while (playerChamber == stairCaseChamber || chamberCells.size() == 0) {
+            stairCaseChamber = selectChamber(rng);
+            chamberCells = getEmptyCellsFromChamber(cells, stairCaseChamber);
+        }
+        std::uniform_int_distribution<unsigned> selectStairCaseCell(0, cells.size()-1);
+        index = selectStairCaseCell(rng);
+        while (cells[index]->getChamber() == p->getCell()->getChamber()) {
+            index = selectStairCaseCell(rng);
+        }
+        cells[index]->setIsStairCase(true);
+        cells.erase(cells.begin() + index);
+
+        // Generate potions with equal probability
+        // -> 10 potions per floor,
+        // -> any chamber has 1/5 chance to spawn a potion
+        // -> 1/6 chance to spawn a particular potion
+
+
+        // basically:
+        // -> loop through this 10 times
+        // -> randomly choose an available chamber, 1/5 chance
+        // -> randomly choose an empty/availble cell in said chamber.
+        // -> pick a number from 1-6 to represent the 6 potions, and generate it.
+        int potionSpawnCap = 10;
+        for (int i = 0; i < potionSpawnCap; ++i) {
+            int potionChamber = selectChamber(rng);
+            chamberCells = getEmptyCellsFromChamber(cells, potionChamber);
+            while (chamberCells.size() == 0) {
+                potionChamber = selectPlayerChamber(rng);
+                chamberCells = getEmptyCellsFromChamber(cells, playerChamber);
+            }
+            std::uniform_int_distribution<unsigned> selectPotionCell(0, chamberCells.size()-1);
+            index = selectPotionCell(rng);
+            std::uniform_int_distribution<unsigned> selectPotionType(0, 5);
+            int potionType = selectPotionType(rng);
+            Item* i = generateItem(potionType); //TODO: create this function
+            items.push_back(i);
+            i->setCell(cells[index]);
+            cells[index]->setEntity(i);
+            cells.erase(cells.begin() + index);
+            // convert potionType int to char
+        }
+
+        // Generate gold
+        int goldSpawnCap = 10;
+        for (int i = 0; i < goldSpawnCap; ++i) {
+            int goldChamber = selectChamber(rng);
+            chamberCells = getEmptyCellsFromChamber(cells, goldChamber);
+            while (chamberCells.size() == 0) {
+                goldChamber = selectChamber(rng);
+                chamberCells = getEmptyCellsFromChamber(cells, goldChamber);
+            }
+            std::uniform_int_distribution<unsigned> selectGoldCell(0, chamberCells.size()-1);
+            index = selectGoldCell(rng);
+            std::uniform_int_distribution<unsigned> selectGoldType(1, 8);
+            int goldType = selectGoldType(rng);
+            int filteredGoldType;
+            // if 1-5, normal gold. if 6-7, small goard. if 8, dragon hoard
+            if (goldType <= 5) {
+                filteredGoldType = 6;
+            } else if (goldType <= 7) {
+                filteredGoldType = 7;
+            } else {
+                filteredGoldType = 8;
+            }
+            Item* i = generateItem(filteredGoldType);
+            items.push_back(i);
+            i->setCell(cells[index]);
+            cells[index]->setEntity(i);
+            cells.erase(cells.begin() + index);
+        }
+
+        // Generate barrier suit
+        if (currentFloor == barrierSuitFloor) {
+            int barrierSuitChamber = selectChamber(rng);
+            chamberCells = getEmptyCellsFromChamber(cells, barrierSuitChamber);
+            while (chamberCells.size() == 0) {
+                barrierSuitChamber = selectChamber(rng);
+                chamberCells = getEmptyCellsFromChamber(cells, barrierSuitChamber);
+            }
+            std::uniform_int_distribution<unsigned> selectBSCell(0, cells.size()-1);
+            index = selectBSCell(rng);
+            Item* i = generateItem('B'); // TODO: set up enum for all these vals
+            items.push_back(i);
+            i->setCell(cells[index]);
+            cells[index]->setEntity(i);
+            cells.erase(cells.begin() + index);
+        }
+
+        // Generate enemies
+        int enemySpawnCap = 20;
+        int enemyCount = 0;
+        for (int i = 0; i < items.size(); ++i) {
+            if (items[i].getIsProtected()) {
+                Enemy* e = generateEnemy('D');
+                items[i]->setProtector(e);
+            }
+            ++enemyCount;
+        }
+
+        for (enemyCount < 20; ++enemyCount) {
+            // generate enemy
+            std::uniform_int_distribution<unsigned> selectEnemyType(1, 18);
+            int enemyType = selectEnemyType(rng);
+            char filteredEnemyType;
+            if (enemyType < 5) {
+                // Werewolf: 4/18 odds
+                filteredEnemyType = 'W';
+            } else if (enemyType < 8) {
+                // Vampire: 3/18 odds
+                filteredEnemyType = 'V';
+            } else if (enemyType < 13) {
+                // Goblin: 5/18 odds.
+                filteredEnemyType = 'N';
+            } else if (enemyType < 15) {
+                // Troll: 2/18 odds
+                filteredEnemyType = 'X';
+            } else if (enemyType < 17) {
+                // Pheonix: 2/18 odds
+                filteredEnemyType = 'X';
+            } else {
+                // Merchant: 2/18 odds
+                filteredEnemyType = 'M';
+            }
+            Enemy* e = generateEnemy(filteredEnemyType);
+            enemies.push_back(e);
+
+            // get enemy position
+            int enemyChamber = selectChamber(rng);
+            chambers = getEmptyCellsFromChamber(cells, enemyChamber);
+            while (chambers.size() == 0) {
+                enemyChamber = selectChamber(rng);
+                chambers = getEmptyCellsFromChamber(cells, enemyChamber);
+            }
+            std::uniform_int_distribution<unsigned> selectEnemyCell(0, chambers.size() - 1);
+            index = selectEnemyCell(rng);
+            e->setCell(cells[index]);
+            cells[index]->setEntity(e);
+            cells.erase(cells.begin() + index);
+        }
+
+        // -> get a vector of all floor tiles in vector<<>> floor
+        // -> uniform distribution from 0 to cells.size() to pick cell for player
+        // -> then, again for stairs (repeat until picked cell !in player chamber)
+        // -> NOTE: remove picked cells from our vector of cells as we go on
+
+        // -> 1. set player position
+        // -> 2. set stairs (ensure player and stairs are in a different chamber)
+        // -> 3. generate + set potions
+        // -> 4. generate + set gold
+        // -> 5. potentially generate barrier suit
+        // -> 5. generate + set dragons for dragon hoards and barrier suit
+        // -> 6. generate + set remaining enemies
+    } else {
+        // Floor entities have already been loaded in
+    }
+
+    int numEnemies = enemies.size();
+    std::uniform_int_distribution<unsigned> selectCompassHolder(0, numEnemies - 1);
+    int compassHolderIndex = selectCompassHolder(rng);
+    enemies[i]->setHasCompass(true);
+
+    // TODO: set game action msg
+}
+
+std::vector<Cell*> getEmptyCellsFromChamber(std::vector<Cell*> cells, int chamber) {
+    std::vector<Cell*> emptyCells;
+    for (int i = 0; i < cells.size(); ++i) {
+        if (cells[i]->getChamber() == chamber && cells[i]->getType() == FloorType::tile) {
+            emptyCells.push_back(cells[i]);
+        }
+    }
+    return emptyCells;
+}
+
+void Game::loadFloorFromFile() {
     int lowerBound = (currentFloor - 1) * 5;
     int upperBound = (currentFloor * 5) - 1;
     int lineCount = 0;
@@ -43,6 +252,7 @@ void Game::generateNewFloor(){
     if (source.is_open()) {
         std::string currentLine;
         std::vector<int> assignedChambers;
+        std::vector<Dragon*> dragons;
         while (std::getline(source, currentLine)) {
             if (lineCount < lowerBound) continue;
             if (lineCount > upperBound) break;
@@ -57,48 +267,46 @@ void Game::generateNewFloor(){
 
                 Cell* c = new Cell{row, column, currentChar};
                 assignChambers(c, assignedChambers);
+                currentRow.push_back(c);
                 ++column;
 
                 if (!isTesting) continue;
 
                 if (c->getType() == FloorType::player) {
                     p->setCell(c);
+                    c->setEntity(p);
                 } else if (c->getType() == FloorType::enemy) {
                     Enemy* e = generateEnemy(c->getSymbol());
                     e->setCell(c);
+                    c->setEntity(e);
                     enemies.push_back(e);
+                    if (c->getSymbol() == 'D') {
+                        //TODO: add check to make sure dynamic_cast is not null
+                        dragons.push_back(std::dynamic_cast<Dragon*>(e));
+                    }
                 } else if (c->getType() == FloorType::item) {
                     Item* i = generateItem(c->getSymbol());
+                    i->setCell(c);
+                    c->setEntity(i);
                     items.push_back(i);
                 } else if (c->getType() == FloorType::staircase) {
                     c->setIsStairCase(true);
                 }
             }
+            // add row of cells to the floor
+            floor.push_back(currentRow);
             ++lineCount;
+        }
+
+        //TODO:
+        if (isTesting) {
+            // set up any created dragons to protect their surrounding dragon hoard or bs
         }
         source.close();
     } else {
         std::cout << "Unable to open file." << std::endl;
         // TODO: maybe throw an exception?
     }
-
-    if (isTesting) {
-        // set up any created dragons to protect their surrounding dragon hoard or bs
-    }
-
-    if (!isTesting) {
-        // Floor entities have not been generated yet.
-
-        // -> 1. set player position
-        // -> 2. set stairs (ensure player and stairs are in a different chamber)
-        // -> 3. generate + set potions
-        // -> 4. generate + set gold
-        // -> 5. potentially generate barrier suit
-        // -> 5. generate + set dragons for dragon hoards and barrier suit
-        // -> 6. generate + set remaining enemies
-    }
-
-    // choose an enemy to hold the compass (uniform distribution between 0-19 or 1-20)
 }
 
 void Game::assignChambers(Cell* c, std::vector<int>& chambers) {

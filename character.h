@@ -1,5 +1,5 @@
-#ifndef __CHARACTER_H_
-#define __CHARACTER_H_
+#ifndef _CHARACTER_H_
+#define _CHARACTER_H_
 
 #include <string>
 #include "entity.h"

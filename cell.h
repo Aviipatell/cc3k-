@@ -46,6 +46,8 @@ class Cell{
         void setIsStairCase(bool b);
         void setChamber(int val);
 
+        FloorType determineCellType(char symbol);
+
         int getChamber() const;
         Position getPosition() const;
         char getSymbol() const;

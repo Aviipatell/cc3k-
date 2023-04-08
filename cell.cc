@@ -3,32 +3,28 @@
 // Cell constructor
 
 Cell::Cell(int row, int column, char symbol) : pos{Position{.row = row, .column = column}}, symbol{symbol} {
+    this->type = determineCellType(symbol);
+}
 
-    // remember that on !isTesting, cells can and will only be constructed with:
-    // -> . (floor tiles)
-    // -> | (walls)
-    // -> - (walls)
-    // -> + (doors)
-    // -> # (passages)
-
-    if (symbol == '@') {
-        type = FloorType::player;
+FloorType Cell::determineCellType(char symbol) {
+     if (symbol == '@') {
+        return FloorType::player;
     } else if (symbol == '/') {
-        type = FloorType::staircase;
+        return FloorType::staircase;
     } else if (symbol == ' ') {
-        type = FloorType::blank;
+        return FloorType::blank;
     } else if (symbol == '|' || symbol == '-') {
-        type = FloorType::wall;
+        return FloorType::wall;
     } else if (symbol == '+') {
-        type = FloorType::door;
+        return FloorType::door;
     } else if (symbol == '#') {
-        type = FloorType::passage;
+        return FloorType::passage;
     } else if (symbol == 'V' || symbol == 'W' || symbol == 'N' || symbol == 'M' || symbol == 'D' || symbol == 'X' || symbol == 'T') {
-        type = FloorType::enemy;
+        return FloorType::enemy;
     } else if (symbol == '0' || symbol == '1' || symbol == '2' || symbol == '3' || symbol == '4' || symbol == '5') {
-        type = FloorType::item;
+        return FloorType::item;
     } else if (symbol == '6' || symbol == '7' || symbol == '8' || symbol == '9') {
-        type = FloorType::item;
+        return FloorType::item;
     }
 }
 
@@ -45,6 +41,11 @@ void Cell::setNeighbours() {
 
 void Cell::setIsStairCase(bool b) {
     this->isStairCase = true;
+    if (b) {
+        type = FloorType::staircase;
+    } else {
+        type = FloorType::tile; // TODO: confirm if I need this else condition
+    }
 }
 
 void Cell::setChamber(int val) {
