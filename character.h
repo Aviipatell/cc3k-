@@ -5,26 +5,27 @@
 #include "entity.h"
 
 class Character: public Entity {
-    int maxHealthPoints;
-    int healthPoints;
-    int attackPoints;
-    int defencePoints;
+    int maxHealth;
+    int health;
+    int attack;
+    int defence;
     std::string race;
 
     public:
         // Constructor
-        Character(int maxHealthPoints, int attackPoints, int defencePoints, std::string race);
+        Character(int maxHealth, int attack, int defence, std::string race);
+        virtual ~Character() = 0;
         // Setters
-        void setMaxHealthPoints(int maxHealthPoints);
-        void setHealthPoints(int healthPoints);
-        void setAttackPoints(int attackPoints);
-        void setDefencePoints(int defencePoints);
+        void setMaxHealth(int maxHealth);
+        void setHealth(int health);
+        void setAttack(int attack);
+        void setDefence(int defence);
         void setRace(std::string race);
         // Getters
-        int getMaxHealthPoints() const;
-        int getHealthPoints() const;
-        int getAttackPoints() const;
-        int getDefencePoints() const;
+        int getMaxHealth() const;
+        int getHealth() const;
+        int getAttack() const;
+        int getDefence() const;
         std::string getRace() const;
         // Helpers
         bool isDead() const;

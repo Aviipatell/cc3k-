@@ -1,39 +1,39 @@
 #include "character.h"
 
 // Constructor
-Character::Character(int maxHealthPoints, int attackPoints, int defencePoints, std::string race) : maxHealthPoints{maxHealthPoints}, healthPoints{maxHealthPoints}, attackPoints{attackPoints}, defencePoints{defencePoints}, race{race} {};
+Character::Character(int maxHealth, int attack, int defence, std::string race) : maxHealth{maxHealth}, health{maxHealth}, attack{attack}, defence{defence}, race{race} {};
 
 // Setters
 
-void Character::setMaxHealthPoints(int maxHealthPoints) {
-    if (maxHealthPoints <= 0) {
-        this->maxHealthPoints = 1;
+void Character::setMaxHealth(int maxHealth) {
+    if (maxHealth <= 0) {
+        this->maxHealth = 1;
     } else {
-        this->maxHealthPoints = maxHealthPoints;
+        this->maxHealth = maxHealth;
     }
 }
 
-void Character::setHealthPoints(int healthPoints) {
-    if (healthPoints < 0) {
-        this->healthPoints = 0;
+void Character::setHealth(int health) {
+    if (health < 0) {
+        this->health = 0;
     } else {
-        this->healthPoints = healthPoints;
+        this->health = health;
     }
 }
 
-void Character::setAttackPoints(int attackPoints) {
-    if (attackPoints < 0) {
-        this->attackPoints = 0;
+void Character::setAttack(int attack) {
+    if (attack < 0) {
+        this->attack = 0;
     } else {
-        this->attackPoints = attackPoints;
+        this->attack = attack;
     }
 }
 
-void Character::setDefencePoints(int defencePoints) {
-    if (defencePoints < 0) {
-        this->defencePoints = 0;
+void Character::setDefence(int defence) {
+    if (defence < 0) {
+        this->defence = 0;
     } else {
-        this->defencePoints = defencePoints;
+        this->defence = defence;
     }
 }
 
@@ -43,20 +43,20 @@ void Character::setRace(std::string race) {
 
 // Getters
 
-int Character::getMaxHealthPoints() const {
-    return maxHealthPoints;
+int Character::getMaxHealth() const {
+    return maxHealth;
 }
 
-int Character::getHealthPoints() const {
-    return healthPoints;
+int Character::getHealth() const {
+    return health;
 }
 
-int Character::getAttackPoints() const {
-    return attackPoints;
+int Character::getAttack() const {
+    return attack;
 }
 
-int Character::getDefencePoints() const {
-    return defencePoints;
+int Character::getDefence() const {
+    return defence;
 }
 
 std::string Character::getRace() const {
@@ -66,5 +66,5 @@ std::string Character::getRace() const {
 // Helpers
 
 bool Character::isDead() const {
-    return healthPoints == 0;
+    return health == 0;
 }

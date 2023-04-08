@@ -6,7 +6,7 @@ class Cell;
 class Entity {
     Cell* c;
 public:
-    virtual ~Entity() = 0; // make entity abstract
+    virtual ~Entity() = 0;
 
     Cell* getCell();
     void setCell(Cell *c);
