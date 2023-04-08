@@ -1,7 +1,8 @@
 #include "game.h"
 #include "cell.h"
 #include "player.h"
-// #include "enemy.h"
+#include "enemy.h"
+#include "item.h"
 
 Game::Game(int raceSelect, bool DLCSelect, bool isTesting, std::string floorPlanSrc, std::default_random_engine& rng) :
     DLC{DLCSelect}, isTesting{isTesting}, floorPlanSrc{floorPlanSrc}, rng{rng} {
@@ -56,7 +57,6 @@ void Game::generateNewFloor(){
 
                 Cell* c = new Cell{row, column, currentChar};
                 assignChambers(c, assignedChambers);
-
                 ++column;
 
                 if (!isTesting) continue;
@@ -65,6 +65,7 @@ void Game::generateNewFloor(){
                     p->setCell(c);
                 } else if (c->getType() == FloorType::enemy) {
                     Enemy* e = generateEnemy(c->getSymbol());
+                    e->setCell(c);
                     enemies.push_back(e);
                 } else if (c->getType() == FloorType::item) {
                     Item* i = generateItem(c->getSymbol());
@@ -129,6 +130,12 @@ void Game::assignChambers(Cell* c, std::vector<int>& chambers) {
                     }
                 }
             }
+            // pop off leftChamber from chambers vector
+            int leftChamberIndex;
+            for (int i = 0; i < chambers.size(); ++i) {
+                if (leftChamber == chambers[i]) leftChamberIndex = i;
+            }
+            chambers.erase(chambers.begin() + leftChamberIndex);
             currentChamber = topChamber;
         }
 
@@ -144,6 +151,7 @@ void Game::assignChambers(Cell* c, std::vector<int>& chambers) {
         c->setChamber(currentChamber);
         chambers.push_back(currentChamber);
     }
+    // set current chamber
     c->setChamber(currentChamber);
 }
 

@@ -1,7 +1,6 @@
 #ifndef _CELL_H_
 #define _CELL_H_
 
-#include "cell.h"
 #include <vector>
 
 // enum FloorType {Blank, Wall, Tiles, Passage, Door};
@@ -22,11 +21,11 @@ enum FloorType {
     item
 };
 
-class Entity;
-
 struct Position {
     int row, column;
 };
+
+class Entity;
 
 class Cell{
 
