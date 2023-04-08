@@ -13,8 +13,11 @@ class Player: public Character {
 
     public:
         Player(std::string race);
+
+        void setPlayerPosition();
+
         int getPlayerGold() const;
-        int setPlayerGold(int val);
+        void setPlayerGold(int val);
 
         // we'll keep this attack function as a virtual to enable type based attacking in the future.
         virtual void attack(Enemy& e) = 0;

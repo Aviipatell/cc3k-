@@ -1,5 +1,5 @@
-#ifndef __ENTITY_H_
-#define __ENTITY_H_
+#ifndef _ENTITY_H_
+#define _ENTITY_H_
 
 class Cell;
 
@@ -13,6 +13,8 @@ public:
 
     void setCell(Cell *c);
     void swapCells(Cell *c);
+
+    // what are there for?
     bool isPlayer();
     bool isEnemy();
     bool isItem();

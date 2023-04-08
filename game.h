@@ -37,7 +37,7 @@ enum PlayerRaces {
 };
 
 class Game {
-    Player *p;
+    Player* p;
     std::vector<std::vector<Cell*>> floor;
     std::vector<Enemy*> enemies;
     std::vector<Item*> items;
@@ -56,7 +56,6 @@ class Game {
 
     std::default_random_engine& rng;
 
-
     TestDisplay* td;
 
     public:
@@ -64,10 +63,13 @@ class Game {
         Game(int raceSelect, bool DLCSelect, bool isTesting, std::string floorPlanSrc, std::default_random_engine& rng);
         void generateNewFloor();
         Player* generatePlayer(int raceSelect);
-        void generateEnemy(char type = 0);
-        void generateItem(char type = 0);
+        Enemy* generateEnemy(char type = 0);
+        Item* generateItem(char type = 0);
 
         void removeFloorEntities();
+        void assignChambers(Cell* c, std::vector<int>& chambers);
+        // void mergeChambers(std::vector<std::vector<Position>>& chambers);
+        int getUnsetChamber(std::vector<int>& chambers);
 
         void attack(char dir1, char dir2);
         void usePotion(char dir1, char dir2);
