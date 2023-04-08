@@ -8,7 +8,3 @@ Cell* Entity::getCell() {
 void Entity::setCell(Cell *c) {
     this->c = c;
 }
-
-void Entity::swapCell(Cell *c) {
-    
-}
