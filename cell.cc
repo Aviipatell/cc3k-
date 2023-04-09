@@ -1,58 +1,81 @@
 #include "cell.h"
 
-// Cell constructor
+// Constructor
 
 Cell::Cell(int row, int column, char symbol) : pos{Position{.row = row, .column = column}}, symbol{symbol} {
-    this->type = determineCellType(symbol);
+    setFloorType(this->symbol);
 }
 
-FloorType Cell::determineCellType(char symbol) {
-     if (symbol == '@') {
-        return FloorType::player;
-    } else if (symbol == '/') {
-        return FloorType::staircase;
-    } else if (symbol == ' ') {
-        return FloorType::blank;
-    } else if (symbol == '|' || symbol == '-') {
-        return FloorType::wall;
-    } else if (symbol == '+') {
-        return FloorType::door;
-    } else if (symbol == '#') {
-        return FloorType::passage;
-    } else if (symbol == 'V' || symbol == 'W' || symbol == 'N' || symbol == 'M' || symbol == 'D' || symbol == 'X' || symbol == 'T') {
-        return FloorType::enemy;
-    } else if (symbol == '0' || symbol == '1' || symbol == '2' || symbol == '3' || symbol == '4' || symbol == '5') {
-        return FloorType::item;
-    } else if (symbol == '6' || symbol == '7' || symbol == '8' || symbol == '9') {
-        return FloorType::item;
+// Setters
+
+void Cell::setFloorType(char symbol) {
+    type = FloorType::Tile; // Maybe set to FloorType::Blank
+    switch(symbol) {
+        case ' ':
+            type = FloorType::Blank;
+            break;
+        case '|':
+        case '-':
+            type = FloorType::Wall;
+            break;
+        case '+':
+            type = FloorType::Door;
+            break;
+        case '.':
+            type = FloorType::Tile;
+            break;
+        case '/':
+            type = FloorType::Staircase;
+            break;
+        case '@':
+            type = FloorType::Player;
+            break;
+        case 'V':
+        case 'W':
+        case 'T':
+        case 'N':
+        case 'M':
+        case 'D':
+        case 'X':
+            type = FloorType::Enemy;
+            break;
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            type = FloorType::Item;
+            break;
     }
 }
-
-// Setter functions
 
 void Cell::setEntity(Entity* e) {
     this->e = e;
 }
 
-// should only be called once per cell, after grid generation?
-void Cell::setNeighbours() {
-
+void Cell::setNeighbours(std::vector<Cell*> neighbours) {
+    this->neighbours = neighbours;
 }
 
-void Cell::setIsStairCase(bool b) {
-    this->isStairCase = true;
-    if (b) {
-        type = FloorType::staircase;
+void Cell::setIsStairCase(bool isStairCase) {
+    this->isStairCase = isStairCase;
+    if (isStairCase) {
+        type = FloorType::Staircase;
     } else {
-        type = FloorType::tile; // TODO: confirm if I need this else condition
+        type = FloorType::Tile;
     }
 }
 
-void Cell::setChamber(int val) {
-    this->chamber = val;
+void Cell::setChamber(int chamber) {
+    this->chamber = chamber;
 }
 
-// Getter functions
+// Getters
 
 int Cell::getChamber() const {
     return this->chamber;
@@ -77,7 +100,3 @@ std::vector<Cell*> Cell::getNeighbours() {
 Entity* Cell::getEntity() {
     return this->e;
 }
-
-
-
-// generateItem(char symbol) will take in a numeric identifier for the specific type of potion since otherwise, all potions are identified with the same 'P' symbol. Then,

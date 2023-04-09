@@ -1,7 +1,8 @@
 #include "controller.h"
 #include "game.h"
 
-Controller::Controller(bool isTesting, std::string floorPlanSrc, bool isSeeded, unsigned seed) : isTesting{isTesting}, floorPlanSrc{floorPlanSrc} {
+Controller::Controller(bool isTesting, std::string floorPlanSrc, bool isSeeded, unsigned seed) : floorPlanSrc{floorPlanSrc} {
+    this->mode = (isTesting) ? GameMode::Testing : GameMode::Normal;
     if (isSeeded) {
         this->rng.seed(seed);
     } else {
@@ -26,7 +27,7 @@ void Controller::startGame() {
 
     bool DLCSelect = false;
 
-    if (!this->isTesting) {
+    if (mode == GameMode::Normal) {
         // prompt user for normal or enhanced game
         std::cout << "Would you like to play the normal version or the enhanced version of the game? (n or e)" << std::endl;
         std::cout << "n: Normal version." << std::endl;
@@ -41,11 +42,11 @@ void Controller::startGame() {
         }
 
         // enable DLC if user selected enhanced version
-        if (cmd == 'e') DLCSelect = true;
+        if (cmd == 'e') mode = GameMode::DLC;
     }
 
     int raceSelect;
-    int raceCount = 4;
+    int raceCount = (mode == GameMode::DLC) ? 6 : 4;
     std::cout << "Please select your character's race:" << std::endl;
 
     std::cout << "(1): Human" << std::endl;
@@ -53,7 +54,7 @@ void Controller::startGame() {
     std::cout << "(3): Elf" << std::endl;
     std::cout << "(4): Orc" << std::endl;
 
-    if (DLCSelect) {
+    if (mode == GameMode::DLC) {
         std::cout << "(5): BonusRace1" << std::endl;
         std::cout << "(6): BonusRace2" << std::endl;
         raceCount = 6;
@@ -66,7 +67,7 @@ void Controller::startGame() {
         std::cin >> raceSelect;
     }
 
-    Game* g = new Game{raceSelect, DLCSelect, isTesting, floorPlanSrc, rng};
+    Game* g = new Game{raceSelect-1, floorPlanSrc, mode, rng};
 }
 
 void Controller::restartGame() {

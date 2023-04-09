@@ -4,26 +4,19 @@
 #include "enemy.h"
 #include "item.h"
 
-Game::Game(int raceSelect, bool DLCSelect, bool isTesting, std::string floorPlanSrc, std::default_random_engine& rng) :
-    DLC{DLCSelect}, isTesting{isTesting}, floorPlanSrc{floorPlanSrc}, rng{rng} {
-
-        this->p = generatePlayer(raceSelect); // TODO: define+declare this function
-
-        // set floorPlanSrc for !isTesting case
-        if (!isTesting) {
+Game::Game(int raceSelect, std::string floorPlanSrc, GameMode mode, std::default_random_engine& rng) :
+    floorPlanSrc{floorPlanSrc}, mode{mode}, rng{rng} {
+        this->p = generatePlayer(getPlayerType(raceSelect));
+        if (mode == GameMode::Normal || mode == GameMode::DLC) {
             floorPlanSrc = "FloorPlans/default.txt";
         }
-
-        // determine barrierSuitFloor
+        // Generate BS Floor
         std::uniform_int_distribution<unsigned> selectBSFloor(1, 5);
         this->barrierSuitFloor = selectBSFloor(rng);
-
         generateNewFloor();
-
 }
 
 void Game::generateNewFloor(){
-
     ++currentFloor;
     if (currentFloor > 5) {
         std::cout << "You win." << std::endl; // TODO: remove, this is just temporary
@@ -33,11 +26,10 @@ void Game::generateNewFloor(){
 
     removeFloorEntities();
     isStairsVisible = false;
-
     loadFloorFromFile();
 
     // If not testing, proceed to generate + set all required entities
-    if (!isTesting) {
+    if (mode != GameMode::Testing) {
         int index;
         std::vector<Cell*> cells;
         std::vector<Cell*> chamberCells;
@@ -55,7 +47,7 @@ void Game::generateNewFloor(){
         chamberCells = getEmptyCellsFromChamber(cells, playerChamber);
         // NOTE: no need for this while block below..
         while (chamberCells.size() == 0) {
-            playerChamber = selectPlayerChamber(rng);
+            playerChamber = selectChamber(rng);
             chamberCells = getEmptyCellsFromChamber(cells, playerChamber);
         }
         std::uniform_int_distribution<unsigned> selectPlayerCell(0, chamberCells.size()-1);
@@ -92,18 +84,18 @@ void Game::generateNewFloor(){
         // -> randomly choose an empty/availble cell in said chamber.
         // -> pick a number from 1-6 to represent the 6 potions, and generate it.
         int potionSpawnCap = 10;
-        for (int i = 0; i < potionSpawnCap; ++i) {
+        for (int potionCount = 0; potionCount < potionSpawnCap; ++potionCount) {
             int potionChamber = selectChamber(rng);
             chamberCells = getEmptyCellsFromChamber(cells, potionChamber);
             while (chamberCells.size() == 0) {
-                potionChamber = selectPlayerChamber(rng);
+                potionChamber = selectChamber(rng);
                 chamberCells = getEmptyCellsFromChamber(cells, playerChamber);
             }
             std::uniform_int_distribution<unsigned> selectPotionCell(0, chamberCells.size()-1);
             index = selectPotionCell(rng);
             std::uniform_int_distribution<unsigned> selectPotionType(0, 5);
             int potionType = selectPotionType(rng);
-            Item* i = generateItem(potionType); //TODO: create this function
+            Item* i = generateItem(getItemType(potionType)); //TODO: create this function
             items.push_back(i);
             i->setCell(cells[index]);
             cells[index]->setEntity(i);
@@ -113,7 +105,7 @@ void Game::generateNewFloor(){
 
         // Generate gold
         int goldSpawnCap = 10;
-        for (int i = 0; i < goldSpawnCap; ++i) {
+        for (int goldCount = 0; goldCount < goldSpawnCap; ++goldCount) {
             int goldChamber = selectChamber(rng);
             chamberCells = getEmptyCellsFromChamber(cells, goldChamber);
             while (chamberCells.size() == 0) {
@@ -168,7 +160,7 @@ void Game::generateNewFloor(){
             ++enemyCount;
         }
 
-        for (enemyCount < 20; ++enemyCount) {
+        for (; enemyCount < 20; ++enemyCount) {
             // generate enemy
             std::uniform_int_distribution<unsigned> selectEnemyType(1, 18);
             int enemyType = selectEnemyType(rng);
@@ -197,12 +189,12 @@ void Game::generateNewFloor(){
 
             // get enemy position
             int enemyChamber = selectChamber(rng);
-            chambers = getEmptyCellsFromChamber(cells, enemyChamber);
-            while (chambers.size() == 0) {
+            chamberCells = getEmptyCellsFromChamber(cells, enemyChamber);
+            while (chamberCells.size() == 0) {
                 enemyChamber = selectChamber(rng);
-                chambers = getEmptyCellsFromChamber(cells, enemyChamber);
+                chamberCells = getEmptyCellsFromChamber(cells, enemyChamber);
             }
-            std::uniform_int_distribution<unsigned> selectEnemyCell(0, chambers.size() - 1);
+            std::uniform_int_distribution<unsigned> selectEnemyCell(0, chamberCells.size() - 1);
             index = selectEnemyCell(rng);
             e->setCell(cells[index]);
             cells[index]->setEntity(e);
@@ -225,10 +217,11 @@ void Game::generateNewFloor(){
         // Floor entities have already been loaded in
     }
 
+    // if DLC mode, where chance of any enemy having an item, override selected enemies item
     int numEnemies = enemies.size();
     std::uniform_int_distribution<unsigned> selectCompassHolder(0, numEnemies - 1);
     int compassHolderIndex = selectCompassHolder(rng);
-    enemies[i]->setHasCompass(true);
+    enemies[compassHolderIndex]->setHasCompass(true);
 
     // TODO: set game action msg
 }
@@ -252,30 +245,31 @@ void Game::loadFloorFromFile() {
     if (source.is_open()) {
         std::string currentLine;
         std::vector<int> assignedChambers;
-        std::vector<Dragon*> dragons;
         while (std::getline(source, currentLine)) {
             if (lineCount < lowerBound) continue;
             if (lineCount > upperBound) break;
 
-            // go through all the characters in the line
+            // Parse characters in current line
             std::istringstream iss{currentLine};
             char currentChar;
             int row = lineCount - lowerBound;
             int column = 0;
             std::vector<Cell*> currentRow;
             while (iss >> std::noskipws >> currentChar) {
-
                 Cell* c = new Cell{row, column, currentChar};
+                FloorType cellType = c->getType();
                 assignChambers(c, assignedChambers);
                 currentRow.push_back(c);
                 ++column;
 
-                if (!isTesting) continue;
+                if (mode != GameMode::Testing) continue;
 
-                if (c->getType() == FloorType::player) {
+                if (cellType == FloorType::player) {
                     p->setCell(c);
                     c->setEntity(p);
-                } else if (c->getType() == FloorType::enemy) {
+                } else if (cellType == FloorType::enemy) {
+                    Enemy* e = generateEnemy()
+
                     Enemy* e = generateEnemy(c->getSymbol());
                     e->setCell(c);
                     c->setEntity(e);
@@ -330,7 +324,7 @@ void Game::assignChambers(Cell* c, std::vector<int>& chambers) {
             // conflicting chambers detected.
             // -> use topChamber as precedent,
             // -> get all existing cells in leftChamber, convert to topChamber
-            for (int row = 0; row <= cRow; ++i) {
+            for (int row = 0; row <= cRow; ++row) {
                 for (int col = 0; col < floor[0].size(); ++col) {
                     if (row == cRow && col == cColumn) break;
                     if (floor[row][col]->getChamber() == leftChamber) {
@@ -384,6 +378,14 @@ int Game::getUnsetChamber(std::vector<int>& chambers) {
 }
 
 void Game::removeFloorEntities() {
+    for (int row = 0; row < floor.size(); ++row) {
+        for (int column = 0; column < floor[row].size(); ++column) {
+            delete floor[row][column];
+        }
+        floor[row].clear();
+    }
+    floor.clear();
+
     if (enemies.size() != 0) {
         for (int i = 0; i < enemies.size(); ++i) {
             delete enemies[i];
@@ -397,4 +399,29 @@ void Game::removeFloorEntities() {
         }
     }
     items.clear();
+}
+
+PlayerType Game::getPlayerType(int raceSelect) {
+    PlayerType type;
+    if (raceSelect == 0) {
+        type = PlayerType::Human;
+    } else if (raceSelect == 1) {
+        type = PlayerType::Dwarf;
+    } else if (raceSelect == 2) {
+        type = PlayerType::Elf;
+
+    } else if (raceSelect == 3) {
+        type = PlayerType::Orc;
+
+    } else if (raceSelect == 4) {
+        type = PlayerType::BonusRace1;
+    } else {
+        type = PlayerType::BonusRace2;
+    }
+    return type;
+}
+
+ItemType Game::getItemType(char itemType) {
+    ItemType type;
+
 }

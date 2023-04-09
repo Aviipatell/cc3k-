@@ -11,25 +11,25 @@ enum EnemyType {
     Goblin,
     Merchant,
     Dragon,
-    Phenoix
+    Phoenix
 };
 
 // modify parsing bounds for additional DLC items
-enum ItemType {
-    NoItem=0,
-    Compass,
-    BarrierSuit,
-    RHPotion,
-    BAPotion,
-    BDPotion,
-    PHPotion,
-    WAPotion,
-    BDPotion,
-    Gold,
-    SmallHoard,
-    MerchantHoard,
-    DragonHoard
-};
+// enum ItemType {
+//     NoItem=0,
+//     Compass,
+//     BarrierSuit,
+//     RHPotion,
+//     BAPotion,
+//     BDPotion,
+//     PHPotion,
+//     WAPotion,
+//     BDPotion,
+//     Gold,
+//     SmallHoard,
+//     MerchantHoard,
+//     DragonHoard
+// };
 
 enum AbilityType {
     NoAbility=0,
@@ -42,9 +42,9 @@ class Player;
 class Enemy : public Character {
 
     bool isHostile;
-    bool hasCompass; // don't need, refactor out later
+    bool isGuardingItem;
     bool hasItem;
-    ItemType itemType;
+    char itemSymbol;
     bool hasAbility;
     AbilityType abilityType;
 
@@ -55,17 +55,18 @@ class Enemy : public Character {
 
         // Setters
         void setIsHostile(bool isHostile);
-        void setHasCompass(bool hasCompass);
+        void setIsGuardingItem(bool isGuardingItem);
         void setHasItem(bool hasItem);
-        void setItemType(ItemType itemType);
+        void setItemType(char itemSymbol);
         void setHasAbility(bool hasAbility);
         void setAbilityType(AbilityType abilityType);
 
         // Getters
         bool getIsHostile() const;
+        bool getIsGuardingItem() const;
         bool getHasCompass() const;
         bool getHasItem() const;
-        ItemType getItemType() const;
+        char getItemSymbol() const;
         bool getHasAbility() const;
         AbilityType getAbilityType() const;
 

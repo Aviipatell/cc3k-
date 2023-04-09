@@ -9,7 +9,7 @@ class Game;
 
 class Controller {
     Game *g;
-    bool isTesting;
+    GameMode mode;
     std::string floorPlanSrc;
     std::string msg;
     std::default_random_engine rng;

@@ -26,14 +26,19 @@ class Cell;
 class Enemy;
 class TestDisplay;
 
-// see if we can use this anywhere as a single source of truth
-enum PlayerRaces {
+enum PlayerType {
     Human=0,
     Dwarf,
     Elf,
     Orc,
     BonusRace1,
     BonusRace2
+};
+
+enum GameMode {
+    Testing=0,
+    Normal,
+    DLC
 };
 
 class Game {
@@ -50,29 +55,36 @@ class Game {
     bool isMerchantHostile = false;
     bool isOver = false;
 
-    bool isTesting;
     std::string floorPlanSrc;
-    bool DLC;
-
+    GameMode mode;
     std::default_random_engine& rng;
 
     TestDisplay* td;
 
     public:
+        // Constructor
+        Game(int raceSelect, std::string floorPlanSrc, GameMode mode,
+        std::default_random_engine& rng);
 
-        Game(int raceSelect, bool DLCSelect, bool isTesting, std::string floorPlanSrc, std::default_random_engine& rng);
+        // Setters
         void generateNewFloor();
-        Player* generatePlayer(int raceSelect);
-        Enemy* generateEnemy(char type = 0);
-        Item* generateItem(char type = 0);
 
+        // Getters
+
+        // Helpers
+        Player* generatePlayer(PlayerType playerType);
+        PlayerType getPlayerType(int raceSelect);
+        Enemy* generateEnemy(EnemyType enemyType);
+        EnemyType getEnemyType(char enemyType);
+        Item* generateItem(ItemType itemType);
+        ItemType getItemType(char itemType);
+
+
+        void loadFloorFromFile();
         void removeFloorEntities();
         void assignChambers(Cell* c, std::vector<int>& chambers);
-        // void mergeChambers(std::vector<std::vector<Position>>& chambers);
         int getUnsetChamber(std::vector<int>& chambers);
-        void loadFloorFromFile();
         std::vector<Cell*> getEmptyCellsFromChamber(std::vector<Cell*> cells, int chamber);
-
 
         void attack(char dir1, char dir2);
         void usePotion(char dir1, char dir2);

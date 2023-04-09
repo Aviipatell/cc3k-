@@ -10,15 +10,15 @@
 
 
 enum FloorType {
-    blank=0,
-    wall,
-    door,
-    passage,
-    tile,
-    staircase,
-    player,
-    enemy,
-    item
+    Blank=0,
+    Wall,
+    Door,
+    Passage,
+    Tile,
+    Staircase,
+    Player,
+    Enemy,
+    Item
 };
 
 struct Position {
@@ -38,16 +38,17 @@ class Cell{
     Entity* e;
 
     public:
+        // Constructor
+        Cell(int row, int column, char symbol);
 
-        Cell(int row, int column, char symbol); // parse symbol, set FloorType
-
+        // Setters
+        void setFloorType(char symbol);
         void setEntity(Entity* e);
-        void setNeighbours();
-        void setIsStairCase(bool b);
-        void setChamber(int val);
+        void setNeighbours(std::vector<Cell*> neighbours);
+        void setIsStairCase(bool isStairCase);
+        void setChamber(int chamber);
 
-        FloorType determineCellType(char symbol);
-
+        // Getters
         int getChamber() const;
         Position getPosition() const;
         char getSymbol() const;
