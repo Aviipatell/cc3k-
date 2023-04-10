@@ -6,6 +6,8 @@
 
 Dragon::Dragon(int maxHealth, int attack, int defence, std::string race) : Enemy{maxHealth, attack, defence, race}{
     // setAbilityType(AbilityType::ActiveAbility);
+    setIsGuardian(true);
+    setIsHostile(false);
 };
 
 char Dragon::getSymbol() {

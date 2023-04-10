@@ -16,7 +16,7 @@ class Gold : public Item {
     GoldType goldType;
     double amount = 1;
     public:
-        Gold(char protectorType, bool needsProtection, bool isProtected, char goldType);
+        Gold(char goldType,char protectorType='0', bool needsProtection=false, bool isProtected=false);
 
         char getSymbol() override;
         void setGoldType(char goldType);

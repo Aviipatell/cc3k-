@@ -4,6 +4,19 @@
 #include "enemy.h"
 #include "item.h"
 #include "statusEffect.h"
+#include "human.h"
+#include "dwarf.h"
+#include "elf.h"
+#include "orc.h"
+#include "gold.h"
+#include "barrierSuit.h"
+#include "dragon.h"
+#include "vampire.h"
+#include "troll.h"
+#include "goblin.h"
+#include "werewolf.h"
+#include "merchant.h"
+#include "phoenix.h"
 #include <sstream>
 
 Game::Game(int raceSelect, std::string floorPlanSrc, GameMode mode, std::default_random_engine& rng) :
@@ -117,19 +130,11 @@ void Game::generateNewFloor(){
                 Entity* e = generateEntity(protectorType);
                 Cell* itemCell = i->getCell();
                 randomCell = getRandomValidNeighbour(itemCell);
-                if (randomCell == nullptr) randomCell = overrideRandomValidNeighbour(itemCell); // TODO:
                 index = getIndexOfCell(randomCell, cells);
                 e->setCell(randomCell);
                 randomCell->setEntity(e);
-                if (index == -1) {
-                    // no valid spots for an enemy to protect this treasure.
-                    enemies.erase(enemies.begin() + enemyCount);
-                    delete e;
-                    continue;
-                } else {
-                    cells.erase(cells.begin() + index);
-                }
-                // parse through items again, for those that are neighbours that need protection and not current item, add to this Enemy's guarding list.
+                cells.erase(cells.begin() + index);
+
                 std::vector<Item*> guardingItems;
                 for (Item* i2: items) {
                     if (i2->getNeedsProtection() && i2 != i && randomCell->isNeighbour(i2->getCell())) { // TODO:
@@ -137,11 +142,11 @@ void Game::generateNewFloor(){
                     }
                 }
                 guardingItems.push_back(i);
-                Enemy* temp = std::dynamic_cast<Enemy*>(e); // might not need, I could just use enemies vec
-                if (temp) temp->setGuardedItems(guardedItems); // should modify original pointer
+                i->setIsProtected(true);
+                Enemy* temp = dynamic_cast<Enemy*>(e);
+                if (temp) temp->setGuardedItems(guardingItems);
                 ++enemyCount;
             }
-            // TODO: go through items that needed protection, set them to isProtected = true;
             if (enemyCount == enemySpawnCap) break;
         }
 
@@ -176,13 +181,11 @@ void Game::generateNewFloor(){
 
     }
 
-    // TODO: set Enemy::guardedItems for Testing GameMode, in loadfloorfromfile
-
     int numEnemies = enemies.size();
     std::uniform_int_distribution<unsigned> selectCompassHolder(0, numEnemies-1);
     int compassIndex = selectCompassHolder(rng);
-    enemies[compassIndex]->setHasItem(true); // should overwrite any other item if any
-    enemies[compassIndex]->setItemType('C');
+    enemies[compassIndex]->setHasItem(true);
+    enemies[compassIndex]->setItemSymbol('C'); // TODO: needs functional delete enemies
 
     // TODO: set game action msg
 }
@@ -251,11 +254,11 @@ void Game::loadFloorFromFile() {
                 std::vector<Item*> guardedItems;
                 Cell* enemyCell = enemy->getCell();
                 for (Item* i: items) {
-                    if (i->getNeedsProtection() && enemyCell->isNeighbour(i->getCell())) { // TODO:
+                    if (i->getNeedsProtection() && enemyCell->isNeighbour(i->getCell())) {
                         guardedItems.push_back(i);
+                        i->setIsProtected(true);
                     }
                 }
-                std::vector<Item*> guardedItems;
                 enemy->setGuardedItems(guardedItems);
             }
         }
@@ -263,7 +266,7 @@ void Game::loadFloorFromFile() {
 }
 
 Player* Game::generatePlayer(int playerType) {
-    Player p;
+    Player* p;
     if (playerType == 0) {
         // Generate Human Player
         p = new Human{};
@@ -291,9 +294,10 @@ void Game::clearPlayerStatus() {
 }
 
 Entity* Game::generateEntity(char entityType) {
+
     switch(entityType) {
         case 'V':
-            Enemy* v = new Vampire{}; // TODO: switch specifc classes to Enemy*
+            Enemy* v = new Vampire{};
             enemies.push_back(v);
             return v;
         case 'W':
@@ -310,45 +314,66 @@ Entity* Game::generateEntity(char entityType) {
             return n;
         case 'M':
             Enemy* m = new Merchant{};
+            m->setIsHostile(isMerchantHostile);
             enemies.push_back(m);
             return m;
         case 'D':
             Enemy* d = new Dragon{};
+            d->setIsGuardian(true);
             enemies.push_back(d);
             return d;
         case 'X':
             Enemy* x = new Phoenix{};
             enemies.push_back(x);
             return x;
+        case 'C':
+            Item* c = new Compass{0, false, false};
+            items.push_back(c);
+            return c;
         case 'B':
-            // barrier suit
-            return;
+            Item* b = new BarrierSuit{'D', true, false};
+            items.push_back(b);
+            return b;
         case '0':
-            // RHPotion
-            return;
+            Potion* p = new Potion{PotionType::RHPotion};
+            items.push_back(p);
+            return p;
         case '1':
-            // BAPotion
-            return;
+            Potion* p = new Potion{PotionType::BAPotion};
+            items.push_back(p);
+            return p;
         case '2':
-            // BDPotion
-            return;
+            Potion* p = new Potion{PotionType::BDPotion};
+            items.push_back(p);
+            return p;
         case '3':
-            // PHPotion
-            return;
+            Potion* p = new Potion{PotionType::PHPotion};
+            items.push_back(p);
+            return p;
         case '4':
-            // WAPotion
-            return;
+            Potion* p = new Potion{PotionType::WAPotion};
+            items.push_back(p);
+            return p;
         case '5':
-            // WDPotion
-            return;
+            Potion* p = new Potion{PotionType::WDPotion};
+            items.push_back(p);
+            return p;
         case '6':
-            // Normal Gold
+            Gold* g = new Gold{GoldType::Normal};
+            items.push_back(g);
+            return g;
         case '7':
-            // Small Hoard
+            Gold* g = new Gold{GoldType::SmallHoard};
+            items.push_back(g);
+            return g;
         case '8':
-            // Merchant Hoard
+            Gold* g = new Gold(GoldType::MerchantHoard);
+            items.push_back(g);
+            return g;
         case '9':
-            // Dragon Hoard
+            Gold* g = new Gold(GoldType::DragonHoard, 'D', true, false);
+            items.push_back(g);
+            return g;
     }
 }
 

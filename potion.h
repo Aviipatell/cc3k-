@@ -20,7 +20,7 @@ class Potion : public Item {
     PotionType potionType;
 
     public:
-        Potion(char protectorType, bool needsProtection, bool isProtected, char potionType);
+        Potion(char potionType, char protectorType='0', bool needsProtection=false, bool isProtected=false);
 
         char getSymbol() override;
         void setPotionType(char potionType);

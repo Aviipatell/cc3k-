@@ -14,7 +14,7 @@ class Item;
 
 class Enemy : public Character {
 
-    bool isHostile;
+    bool isHostile = true;
     bool isGaurdian;
     std::vector<Item*> guardedItems; // 1..*
     bool hasItem;
