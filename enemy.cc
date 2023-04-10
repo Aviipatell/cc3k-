@@ -39,7 +39,7 @@ void Enemy::setGuardedItems(std::vector<Item*> guardedItems) {
     this->guardedItems = guardedItems;
 }
 
-void Enemy::setHasAlreadyMoved(bool hasAlreadyMoved) const {
+void Enemy::setHasAlreadyMoved(bool hasAlreadyMoved) {
     this->hasAlreadyMoved = hasAlreadyMoved;
 }
 

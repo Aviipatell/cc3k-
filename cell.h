@@ -25,7 +25,8 @@
 enum FloorType {
     Unknown=0,
     Blank,
-    Wall,
+    VerticalWall,
+    HorizontalWall,
     Door,
     Passage,
     Tile
@@ -55,7 +56,6 @@ class Cell{
         // Setters
         void setFloorType(char symbol);
         void setEntity(Entity* e);
-        void swapEntity(Cell* other); // TODO:
         void setNeighbours(std::vector<Cell*> neighbours);
         void setIsStairCase(bool isStairCase);
         void setChamber(int chamber);

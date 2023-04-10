@@ -20,6 +20,8 @@ enum Direction {
     SW
 };
 
+#include "potion.h"
+
 class Entity;
 class Player;
 class Cell;
@@ -39,6 +41,9 @@ class Game {
     std::vector<Enemy*> enemies;
     std::vector<Item*> items;
     std::string gameMessage;
+
+    std::vector<PotionType> knownPotions;
+    bool isKnownPotion(PotionType pt);
 
     int currentFloor = 0;
     int barrierSuitFloor;

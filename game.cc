@@ -309,7 +309,7 @@ Entity* Game::generateEntity(char entityType) {
             enemies.push_back(n);
             return n;
         case 'M':
-            Enemy* m = new Merchant{isMerchantHostile};
+            Enemy* m = new Merchant{};
             enemies.push_back(m);
             return m;
         case 'D':
@@ -597,7 +597,7 @@ void Game::movePlayer(Direction dir){
     }
 
     // Look for nearby items
-    o <<
+    o << scoutNeighboursForItems(newCell);
 }
 
 std::string Game::scoutNeighboursForItems(Cell* currentCell) {
@@ -608,13 +608,206 @@ std::string Game::scoutNeighboursForItems(Cell* currentCell) {
             Item* i = dynamic_cast<Item*>(e);
             if (i != nullptr) {
                 if (i->getSymbol() == 'C') {
-                    surroundingItems+= "PC"
+                    surroundingItems+= "PC sees a Compass. ";
                 } else if (i->getSymbol() == 'B') {
-
+                    surroundingItems+= "PC sees a Barrier Suit. "
                 } else if (i->getSymbol() == 'G') {
-
+                    surroundingItems+= "PC sees Gold. "
+                } else if (i->getSymbol() == 'P') {
+                    Potion* p = dynamic_cast<Potion*>(i);
+                    if (p != nullptr) {
+                        if (isKnownPotion(p->getPotionType())) {
+                            std::string name = "";
+                            if (p->getPotionType() == PotionType::RHPotion) {
+                                name="RH";
+                            } else if (p->getPotionType() == PotionType::BAPotion) {
+                                name="BA";
+                            } else if (p->getPotionType() == PotionType::BDPotion) {
+                                name="BD";
+                            } else if (p->getPotionType() == PotionType::PHPotion) {
+                                name="PH";
+                            } else if (p->getPotionType() == PotionType::WAPotion) {
+                                name="WA";
+                            } else if (p->getPotionType() == PotionType::WDPotion) {
+                                name="WD";
+                            }
+                            surroundingItems+= "PC sees a " + name + " Potion. ";
+                        } else {
+                            surroundingItems+= "PC sees an unknown Potion. ";
+                        }
+                    }
                 }
             }
         }
+    }
+    return surroundingItems;
+}
+
+bool Game::isKnownPotion(PotionType potion) {
+    bool isKnown = false;
+    for (PotionType pt : knownPotions) {
+        if (pt == potion) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void Game::attack(Direction dir) {
+
+    Cell* c = getCellAtDirection(dir);
+    Enemy* enemy = dynamic_cast<Enemy*>(c->getEntity());
+    std::ostringstream o;
+
+    if (enemy != nullptr) {
+        std::string attackMessage = p->attack(enemy);
+
+        if(enemy->getHealth() == 0){
+            deleteEntity(enemy);
+        }
+
+        o << attackMessage << " ";
+    } else {
+        o << "PC is hallucinating, you WHIFFED!. ";
+    }
+    setGameMessage(o.str());
+    moveEnemies();
+}
+
+void Game::assignNeighbours() {
+    int sizeHeight = this->floor.size();
+    int sizeWidth = this->floor[0].size();
+
+    for (int i = 0; i < sizeHeight; ++i) {
+        for (int j = 0; j < sizeWidth; ++j) {
+            std::vector<Cell*> cell_neighbours;
+
+            // checking for valid neighbours and adding valid ones to the neighbours array
+            if (i - 1 > 0) {
+                cell_neighbours.push_back(this->floor[i-1][j]);
+                if (j - 1 > 0) {
+                    cell_neighbours.push_back(this->floor[i-1][j-1]);
+                }
+                if (j + 1 < sizeWidth) {
+                    cell_neighbours.push_back(this->floor[i-1][j+1]);
+                }
+            }
+            if (i + 1 < sizeHeight) {
+                cell_neighbours.push_back(this->floor[i+1][j]);
+                if (j - 1 > 0) {
+                    cell_neighbours.push_back(this->floor[i+1][j-1]);
+                }
+                if (j + 1 < sizeWidth) {
+                    cell_neighbours.push_back(this->floor[i+1][j+1]);
+                }
+            }
+            if (j - 1 > 0) cell_neighbours.push_back(this->floor[i][j-1]);
+            if (j + 1 < sizeWidth) cell_neighbours.push_back(this->floor[i][j+1]);
+
+            floor[i][j]->setNeighbours(cell_neighbours);
+        }
+    }
+}
+
+Cell* Game::getCellAtDirection(Direction dir) {
+    Position pos = p->getCell()->getPosition();
+    int row = pos.row;
+    int column = pos.column;
+    switch (dir) {
+    case NO:
+        return floor[row-1][column];
+    case SO:
+        return floor[row+1][column];
+    case EA:
+        return floor[row][column+1];
+    case WE:
+        return floor[row][column-1];
+    case NE:
+        return floor[row-1][column+1];
+    case NW:
+        return floor[row-1][column-1];
+    case SE:
+        return floor[row+1][column+1];
+    case SW:
+        return floor[row+1][column-1];
+    case NoDirection:
+        return nullptr;
+    }
+}
+
+void Game::usePotion(Direction dir) {
+    Cell* c = getCellAtDirection(dir);
+    Potion* potion = dynamic_cast<Potion*>(c->getEntity());
+    std::ostringstream o;
+
+    if (potion != nullptr) {
+        std::string potionMessage = potion->useItem(p);
+        PotionType potionType = potion->getPotionType();
+        bool isKnown = false;
+        for (PotionType type : knownPotions) {
+            if (type == potionType) isKnown = true;
+        }
+        if (!(isKnown)) knownPotions.push_back(potionType);
+        o << potionMessage << " ";
+    } else {
+        o << "PC is hallucinating, there is no potion. ";
+    }
+    setGameMessage(o.str());
+    moveEnemies();
+}
+
+void Game::moveEnemies() {
+    std::string curMessage = getGameMessage();
+    std::ostringstream o;
+
+    int sizeHeight = this->floor.size();
+    int sizeWidth = this->floor[0].size();
+
+    for (int i = 0; i < sizeHeight; ++i) {
+        for (int j = 0; j < sizeWidth; ++j) {
+            if (floor[i][j]->getHasEntity()) {
+                bool playerIsNeighbour = false;
+                Enemy* enemy = dynamic_cast<Enemy*>(floor[i][j]->getEntity());
+                if (enemy != nullptr) {
+                    if (!(enemy->getHasAlreadyMoved())) {
+                        std::vector<Cell*> enemyNeighbours = enemy->getCell()->getNeighbours();
+                        for (Cell* cell : enemyNeighbours) {
+                            if (cell->getSymbol() == '@') {
+                                playerIsNeighbour = true;
+                                if (enemy->getIsHostile()) {
+                                    enemy->attack(p);
+                                } else {
+                                    if (enemy->getIsGuardian()) {
+                                        bool shouldAttack = false;
+                                        std::vector<Item*> guardedItems = enemy->getGuardedItems();
+                                        for (Item* item : guardedItems) {
+                                            if (item->getCell()->isNeighbour(cell)) {
+                                                shouldAttack = true;
+                                            }
+                                        }
+                                        if (shouldAttack) enemy->attack(p);
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                        if (!(enemy->getIsGuardian())) {
+                            if (!(playerIsNeighbour)) {
+                                Cell* newCell = getRandomValidNeighbour(floor[i][j]);
+                                newCell->setEntity(enemy);
+                                floor[i][j]->setEntity(nullptr);
+                                enemy->setCell(newCell);
+                            }
+                        }
+                    } else {
+                        continue;
+                    }
+                }
+            }
+        }
+    }
+
+    for (Enemy* e : enemies) {
+        e->setHasAlreadyMoved(false);
     }
 }

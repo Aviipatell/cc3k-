@@ -16,8 +16,9 @@ void Cell::setFloorType(char symbol) {
             type = FloorType::Blank;
             break;
         case '|':
+            type = FloorType::VerticalWall;
         case '-':
-            type = FloorType::Wall;
+            type = FloorType::HorizontalWall;
             break;
         case '+':
             type = FloorType::Door;
@@ -50,24 +51,29 @@ void Cell::setHasEntity(bool hasEntity) {
 }
 
 void Cell::setEntity(Entity* e) {
-    if (e == nullptr) {
-
-    } // TODO:
     this->e = e;
-    // what about reverting back?
-    setSymbol(e->getSymbol());
+    if (e == nullptr) {
+        char symbol;
+        if (type == FloorType::Blank) {
+            setSymbol(' ');
+        } else if (type == FloorType::VerticalWall) {
+            setSymbol('|');
+        } else if (type == FloorType::HorizontalWall) {
+            setSymbol('-');
+        } else if (type == FloorType::Door) {
+            setSymbol('+');
+        } else if (type == FloorType::Passage) {
+            setSymbol('#');
+        } else {
+            setSymbol('.');
+        }
+    } else {
+        setSymbol(e->getSymbol());
+    }
 }
-
-void Cell::swapEntity(Cell* other) {
-    // swap entities, updating both cells in the process.
-    // make sure you update the entities to hold the new cells they point to
-}
-
-// TODO: swap entities function that swaps the two entities
 
 void Cell::setSymbol(char symbol) {
     this->symbol = symbol;
-    setFloorType(symbol);
 }
 
 void Cell::setNeighbours(std::vector<Cell*> neighbours) {

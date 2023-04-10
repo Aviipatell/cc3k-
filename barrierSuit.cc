@@ -7,6 +7,6 @@ char BarrierSuit::getSymbol() {
     return 'B';
 }
 
-std::string useItem(Player* p) {
+std::string BarrierSuit::useItem(Player* p) {
     p->setHasBarrierSuit(true);
 }

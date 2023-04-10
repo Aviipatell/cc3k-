@@ -18,10 +18,6 @@ Controller::~Controller() {
 }
 
 void Controller::startGame() {
-    std::cout << "Welcome to CC3K+." << std::endl;
-    std::cout << "Would you like to play the normal version or the enhanced version? (n or e)" << std::endl;
-    std::cout << "n: Normal version." << std::endl;
-    std::cout << "e: Enhanced version." << std::endl;
 
     std::cout << "Welcome to CC3K+." << std::endl;
 
