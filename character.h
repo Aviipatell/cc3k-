@@ -23,12 +23,12 @@ class Character: public Entity {
         void setRace(std::string race);
         // Getters
         int getMaxHealth();
-        virtual int getHealth();
+        int getHealth();
         virtual int getAttack();
         virtual int getDefence();
         std::string getRace() const;
         // Helpers
-        virtual bool isDead();
+        bool isDead();
 };
 
 #endif

@@ -1,13 +1,10 @@
 #include "rhStatus.h"
 
-RHStatus::RHStatus(Player* next, StatusDuration duration) : StatusEffect{next, duration} {};
-
-int RHStatus::getHealth() {
-    // apply other effects, and then stack on this new effect
-    int health = next->getHealth();
+RHStatus::RHStatus(Player* next, StatusDuration duration) : StatusEffect{next, duration} {
+    int health = getHealth();
     health+= 10;
-    if (health > next->getMaxHealth()) {
-        health = next->getMaxHealth();
+    if (health > getMaxHealth()) {
+        health = getMaxHealth();
     }
-    return health;
-}
+    setHealth(health);
+};

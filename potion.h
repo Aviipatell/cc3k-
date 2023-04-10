@@ -1,24 +1,31 @@
-#ifndef __POTION_H_
-#define __POTION_H_
+#ifndef _POTION_H
+#define _POTION_H
 
 #include "item.h"
-#include <string.h>
+#include <string>
 
-enum PotionDuration { Temporary, Permanent };
+class Player;
 
-// enum PotionType { RH, BA, BD, PH, WA, WD };
+enum PotionType {
+    RHPotion=0,
+    BAPotion,
+    BDPotion,
+    PHPotion,
+    WAPotion,
+    WDPotion
+};
 
-class Potion: public Item {
-    PotionDuration duration;
-    // PotionType type;
-    string effect;
-    bool isKnownPotion;
-public:
-    PotionDuration getDuration();
-    // PotionType getType();
-    string getEffect();
-    bool getIsKnownPotion();
-    void setIsKnownPotion(bool b);
+class Potion : public Item {
+
+    PotionType potionType;
+
+    public:
+        Potion(char protectorType, bool needsProtection, bool isProtected, char potionType);
+
+        void setPotionType(char potionType);
+        PotionType getPotionType() const;
+        std::string getEffect() const;
+        std::string useItem(Player* p) override;
 };
 
 #endif

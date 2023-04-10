@@ -17,8 +17,11 @@ class Player: public Character {
         Player(int maxHealth=0, int attack=0, int defence=0, std::string race="");
         // Setters
         void setPlayerGold(double gold);
+        void setHasBarrierSuit(bool hasBarrierSuit);
         // Getters
         int getPlayerGold() const;
+        bool getHasBarrierSuit() const;
+        char getSymbol() override;
 
         // Helpers
         virtual std::string incrementPlayerGold(double gold);

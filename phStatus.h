@@ -6,7 +6,6 @@
 class PHStatus : public StatusEffect {
     public:
         PHStatus(Player* next, StatusDuration duration=StatusDuration::Permenant);
-        int getHealth() override;
 };
 
 #endif

@@ -9,11 +9,6 @@ StatusEffect::~StatusEffect() {
     delete next;
 }
 
-int StatusEffect::getHealth() {
-    int health = next->getHealth();
-    return health;
-}
-
 int StatusEffect::getAttack() {
     int attack = next->getAttack();
     return attack;
@@ -22,10 +17,4 @@ int StatusEffect::getAttack() {
 int StatusEffect::getDefence() {
     int defence = next->getDefence();
     return defence;
-}
-
-// TODO: might not reference the specific status's getHealth() function?
-bool StatusEffect::isDead() {
-    int health = next->getHealth();
-    return health == 0;
 }

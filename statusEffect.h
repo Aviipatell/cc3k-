@@ -18,10 +18,8 @@ class StatusEffect : public Player {
         // Destructor
         ~StatusEffect();
         // Helpers
-        int getHealth() override;
         int getAttack() override;
         int getDefence() override;
-        bool isDead() override;
 };
 
 #endif

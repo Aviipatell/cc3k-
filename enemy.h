@@ -16,7 +16,7 @@ class Enemy : public Character {
 
     bool isHostile;
     bool isGaurdian;
-    std::vector<Item*> guardedItems; // usually be one, but more if spawned next to multiple treasures that need protection
+    std::vector<Item*> guardedItems; // 1..*
     bool hasItem;
     char itemSymbol;
     bool hasAbility;
@@ -31,7 +31,7 @@ class Enemy : public Character {
         void setIsHostile(bool isHostile);
         void setIsGuardian(bool isGuardian);
         void setHasItem(bool hasItem);
-        void setItemType(char itemSymbol);
+        void setItemSymbol(char itemSymbol);
         void setHasAbility(bool hasAbility);
         void setAbilityType(AbilityType abilityType);
         void setGuardedItems(std::vector<Item*> guardedItems);
@@ -39,7 +39,6 @@ class Enemy : public Character {
         // Getters
         bool getIsHostile() const;
         bool getIsGuardian() const;
-        bool getHasCompass() const;
         bool getHasItem() const;
         char getItemSymbol() const;
         bool getHasAbility() const;
@@ -47,7 +46,7 @@ class Enemy : public Character {
         std::vector<Item*> getGuardedItems() const;
 
         // Helpers
-        virtual void attack(Player* p) = 0;
-        virtual void specialAbility(Player* p = nullptr) = 0;
+        virtual std::string attack(Player* p);
+        virtual std::string specialAbility(Player* p = nullptr) = 0;
 };
 #endif

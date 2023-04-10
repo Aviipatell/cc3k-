@@ -61,6 +61,7 @@ class Game {
     void removeFloorEntities();
     void assignChambers(Cell* c, std::vector<int>& chambers);
     int getUnsetChamber(std::vector<int>& chambers);
+    std::vector<Cell*> getEmptyCells();
     std::vector<Cell*> getEmptyCellsFromChamber(std::vector<Cell*> cells, int chamber);
 
     public:

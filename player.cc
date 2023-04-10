@@ -12,10 +12,22 @@ void Player::setPlayerGold(double gold) {
     this->gold = gold;
 }
 
+void Player::setHasBarrierSuit(bool hasBarrierSuit) {
+    this->hasBarrierSuit = hasBarrierSuit;
+}
+
 // Getters
 
 int Player::getPlayerGold() const {
     return this->gold;
+}
+
+bool Player::getHasBarrierSuit() const {
+    return this->hasBarrierSuit;
+}
+
+char getSymbol() {
+    return '@';
 }
 
 // Helpers
