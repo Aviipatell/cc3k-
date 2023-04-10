@@ -43,19 +43,19 @@ void Character::setRace(std::string race) {
 
 // Getters
 
-int Character::getMaxHealth() const {
+int Character::getMaxHealth() {
     return maxHealth;
 }
 
-int Character::getHealth() const {
+int Character::getHealth() {
     return health;
 }
 
-int Character::getAttack() const {
+int Character::getAttack() {
     return attack;
 }
 
-int Character::getDefence() const {
+int Character::getDefence() {
     return defence;
 }
 
@@ -65,6 +65,6 @@ std::string Character::getRace() const {
 
 // Helpers
 
-bool Character::isDead() const {
+bool Character::isDead() {
     return health == 0;
 }

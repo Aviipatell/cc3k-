@@ -70,6 +70,9 @@ class Cell{
         std::vector<Cell*> getNeighbours() const;
         Entity* getEntity() const;
         bool getHasEntity() const;
+        bool getIsStairCase() const;
+
+        bool isNeighbour(Cell* other) const;
 };
 
 #endif

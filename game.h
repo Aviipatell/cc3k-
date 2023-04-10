@@ -25,16 +25,6 @@ class Cell;
 class Item;
 class Cell;
 class Enemy;
-class TestDisplay;
-
-enum PlayerType {
-    Human=0,
-    Dwarf,
-    Elf,
-    Orc,
-    BonusRace1,
-    BonusRace2
-};
 
 enum GameMode {
     Testing=0,
@@ -47,20 +37,31 @@ class Game {
     std::vector<std::vector<Cell*>> floor;
     std::vector<Enemy*> enemies;
     std::vector<Item*> items;
-    std::string gameAction;
+    std::string gameMessage;
 
-    // will get incremented everytime generateNewFloor is ran?
     int currentFloor = 0;
     int barrierSuitFloor;
     bool isStairsVisible = false;
     bool isMerchantHostile = false;
     bool isOver = false;
-
-    std::string floorPlanSrc;
     GameMode mode;
+    std::string floorPlanSrc;
     std::default_random_engine& rng;
 
-    TestDisplay* td;
+    // Private helpers
+    Player* generatePlayer(int playerType);
+    Entity* generateEntity(char entityType);
+
+    Cell* getRandomEmptyCellFromRandomChamber(std::vector<Cell*> cells, int restrictedChamber = -1);
+    int getIndexOf(Cell* randomCell, std::vector<Cell*> cells);
+    Cell* getRandomValidNeighbour(Cell* cell);
+    Cell* overrideRandomValidNeighbour(Cell* c);
+
+    void loadFloorFromFile();
+    void removeFloorEntities();
+    void assignChambers(Cell* c, std::vector<int>& chambers);
+    int getUnsetChamber(std::vector<int>& chambers);
+    std::vector<Cell*> getEmptyCellsFromChamber(std::vector<Cell*> cells, int chamber);
 
     public:
         // Constructor
@@ -69,19 +70,10 @@ class Game {
 
         // Setters
         void generateNewFloor();
+        void setGameMessage(std::string gameMessage);
 
         // Getters
-
-        // Helpers
-        Player* generatePlayer(int playerType);
-        Entity* generateEntity(char entityType);
-
-
-        void loadFloorFromFile();
-        void removeFloorEntities();
-        void assignChambers(Cell* c, std::vector<int>& chambers);
-        int getUnsetChamber(std::vector<int>& chambers);
-        std::vector<Cell*> getEmptyCellsFromChamber(std::vector<Cell*> cells, int chamber);
+        std::string getGameMessage() const;
 
         void attack(char dir1, char dir2);
         void usePotion(char dir1, char dir2);

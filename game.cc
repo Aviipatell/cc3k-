@@ -119,7 +119,14 @@ void Game::generateNewFloor(){
                 index = getIndexOfCell(randomCell, cells);
                 e->setCell(randomCell);
                 randomCell->setEntity(e);
-                if (index != -1) cells.erase(cells.begin() + index);
+                if (index == -1) {
+                    // no valid spots for an enemy to protect this treasure.
+                    enemies.erase(enemies.begin() + enemyCount);
+                    delete e;
+                    continue;
+                } else {
+                    cells.erase(cells.begin() + index);
+                }
                 // parse through items again, for those that are neighbours that need protection and not current item, add to this Enemy's guarding list.
                 std::vector<Item*> guardingItems;
                 for (Item* i2: items) {
@@ -132,6 +139,7 @@ void Game::generateNewFloor(){
                 if (temp) temp->setGuardedItems(guardedItems); // should modify original pointer
                 ++enemyCount;
             }
+            // TODO: go through items that needed protection, set them to isProtected = true;
             if (enemyCount == enemySpawnCap) break;
         }
 
@@ -252,6 +260,159 @@ void Game::loadFloorFromFile() {
     }
 }
 
+Player* Game::generatePlayer(int playerType) {
+    Player p;
+    if (playerType == 0) {
+        // Generate Human Player
+        p = new Human{};
+    } else if playerType == 1 {
+        // Generate Dwarf Player
+        p = new Dwarf{};
+    } else if (playerType == 2) {
+        // Generate Elf Player
+        p = new Elf{};
+    } else {
+        // Generate Orc Player
+        p = new Orc{};
+    }
+    return p;
+ }
+
+Entity* Game::generateEntity(char entityType) {
+    switch(entityType) {
+        case 'V':
+            Enemy* v = new Vampire{}; // TODO: switch specifc classes to Enemy*
+            enemies.push_back(v);
+            return v;
+        case 'W':
+            Enemy* w = new Werewolf{};
+            enemies.push_back(w);
+            return w;
+        case 'T':
+            Enemy* t = new Troll{};
+            enemies.push_back(t);
+            return t;
+        case 'N':
+            Enemy* n = new Goblin{};
+            enemies.push_back(n);
+            return n;
+        case 'M':
+            Enemy* m = new Merchant{isMerchantHostile};
+            enemies.push_back(m);
+            return m;
+        case 'D':
+            Enemy* d = new Dragon{};
+            enemies.push_back(d);
+            return d;
+        case 'X':
+            Enemy* x = new Phoenix{};
+            enemies.push_back(x);
+            return x;
+        case 'B':
+            // barrier suit
+            return;
+        case '0':
+            // RHPotion
+            return;
+        case '1':
+            // BAPotion
+            return;
+        case '2':
+            // BDPotion
+            return;
+        case '3':
+            // PHPotion
+            return;
+        case '4':
+            // WAPotion
+            return;
+        case '5':
+            // WDPotion
+            return;
+        case '6':
+            // Normal Gold
+        case '7':
+            // Small Hoard
+        case '8':
+            // Merchant Hoard
+        case '9':
+            // Dragon Hoard
+    }
+}
+
+void Game::removeFloorEntities() {
+    for (int row = 0; row < floor.size(); ++row) {
+        for (int column = 0; column < floor[row].size(); ++column) {
+            delete floor[row][column];
+        }
+        floor[row].clear();
+    }
+    floor.clear();
+
+    if (enemies.size() != 0) {
+        for (int i = 0; i < enemies.size(); ++i) {
+            delete enemies[i];
+        }
+    }
+    enemies.clear();
+
+    if (items.size() != 0) {
+        for (int i = 0; i < enemies.size(); ++i) {
+            delete items[i];
+        }
+    }
+    items.clear();
+}
+
+Cell* Game::getRandomEmptyCellFromRandomChamber(std::vector<Cell*> cells, int restrictedChamber) {
+    std::uniform_int_distribution<unsigned> selectChamber(1, 5);
+    int chamber = selectChamber(rng);
+    std::vector<Cell*> chamberCells = getEmptyCellsFromChamber(cells, chamber);
+    while (chamberCells.size() == 0 || (restrictedChamber == chamber)) {
+        chamber = selectChamber(rng);
+        chamberCells = getEmptyCellsFromChamber(cells, chamber);
+    }
+    std::uniform_int_distribution<unsigned> selectCell(0, chamberCells.size() - 1);
+    int cellIndex = selectCell(rng);
+    return cells[cellIndex];
+}
+
+int Game::getIndexOf(Cell* cell, std::vector<Cell*> cells) {
+    for (int i = 0; i < cells.size(); ++i) {
+        if (cell == cells[i]) return i;
+    }
+    return -1;
+}
+
+Cell* getRandomValidNeighbour(Cell* cell) {
+    std::vector<Cell*> validNeighbours;
+    for (Cell* c : cell->getNeighbours()) {
+        if (c->getType() == FloorType::Tile && !c->getHasEntity() && !c->getIsStairCase()) {
+                validNeighbours.push_back(c);
+        }
+    }
+    if (validNeighbours.size() == 0) return nullptr;
+    std::uniform_int_distribution<unsigned> selectNeighbour(0, validNeighbours.size() - 1);
+    int index = selectNeighbour(rng);
+    return validNeighbours[index];
+}
+
+Cell* overrideRandomValidNeighbour(Cell* c) {
+    std::vector<Cell*> selectedNeighbours;
+    for (Cell* c : cell->getNeighbours()) {
+        if (c->getType() == FloorType::Tile && !c->getIsStairCase()) {
+                if (c->getHasEntity()) {
+                    Entity* e = c->getEntity();
+                    if (e->getSymbol() == 'P' || e->getSymbol() == 'G') {
+                        deleteEntity(e); // TODO: create this function
+                        c->setHasEntity(false);
+                        selectedNeighbours.push_back(c);
+                    }
+                }
+        }
+    }
+}
+
 void Game::assignChambers(Cell* c, std::vector<int>& chambers) {
     Position cPos = c->getPosition();
     int cRow = cPos.row;
@@ -259,7 +420,7 @@ void Game::assignChambers(Cell* c, std::vector<int>& chambers) {
     FloorType cType = c->getType();
 
     if (!(cRow >= 1 && cColumn >= 1)) return;
-    if (cType == FloorType::wall || cType == FloorType::door || cType == FloorType::passage || cType == FloorType::blank) return;
+    if (cType != FloorType::Tile) return;
 
     int topChamber = floor[cRow-1][cColumn]->getChamber();
     int leftChamber = floor[cRow][cColumn-1]->getChamber();
@@ -306,8 +467,6 @@ void Game::assignChambers(Cell* c, std::vector<int>& chambers) {
     c->setChamber(currentChamber);
 }
 
-
-
 int Game::getUnsetChamber(std::vector<int>& chambers) {
     if (chambers.size() == 0) {
         return 1;
@@ -328,90 +487,10 @@ int Game::getUnsetChamber(std::vector<int>& chambers) {
     }
 }
 
-
-Entity* Game::generateEntity(char entityType) {
-    switch(entityType) {
-        case 'V':
-            Vampire* v = new Vampire{}; // TODO: switch specifc classes to Enemy*
-            enemies.push_back(v);
-            return e;
-        case 'W':
-            Werewolf* w = new Werewolf{};
-            enemies.push_back(w);
-            return w;
-        case 'T':
-            Troll* t = new Troll{};
-            enemies.push_back(t);
-            return t;
-        case 'N':
-            Goblin* n = new Goblin{};
-            enemies.push_back(n);
-            return n;
-        case 'M':
-            Merchant* m = new Merchant{isMerchantHostile};
-            enemies.push_back(m);
-            return m;
-        case 'D':
-            Dragon* d = new Dragon{};
-            enemies.push_back(d);
-            return d;
-        case 'X':
-            Phoenix* x = new Phoenix{};
-            enemies.push_back(x);
-            return x;
-        case 'B':
-            // barrier suit
-            return;
-        case '0':
-            // RHPotion
-            return;
-        case '1':
-            // BAPotion
-            return;
-        case '2':
-            // BDPotion
-            return;
-        case '3':
-            // PHPotion
-            return;
-        case '4':
-            // WAPotion
-            return;
-        case '5':
-            // WDPotion
-            return;
-        case '6':
-            // Normal Gold
-        case '7':
-            // Small Hoard
-        case '8':
-            // Merchant Hoard
-        case '9':
-            // Dragon Hoard
-    }
+void Game::setGameMessage(std::string gameMessage) {
+    this->gameMessage = gameMessage;
 }
 
-
-void Game::removeFloorEntities() {
-    for (int row = 0; row < floor.size(); ++row) {
-        for (int column = 0; column < floor[row].size(); ++column) {
-            delete floor[row][column];
-        }
-        floor[row].clear();
-    }
-    floor.clear();
-
-    if (enemies.size() != 0) {
-        for (int i = 0; i < enemies.size(); ++i) {
-            delete enemies[i];
-        }
-    }
-    enemies.clear();
-
-    if (items.size() != 0) {
-        for (int i = 0; i < enemies.size(); ++i) {
-            delete items[i];
-        }
-    }
-    items.clear();
+std::string Game::getGameMessage() const {
+    return this->gameMessage;
 }

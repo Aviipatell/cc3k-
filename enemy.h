@@ -3,34 +3,6 @@
 
 #include "character.h"
 
-// enum EnemyType {
-//     NoEnemy=0,
-//     Vampire,
-//     Werewolf,
-//     Troll,
-//     Goblin,
-//     Merchant,
-//     Dragon,
-//     Phoenix
-// };
-
-// modify parsing bounds for additional DLC items
-// enum ItemType {
-//     NoItem=0,
-//     Compass,
-//     BarrierSuit,
-//     RHPotion,
-//     BAPotion,
-//     BDPotion,
-//     PHPotion,
-//     WAPotion,
-//     BDPotion,
-//     Gold,
-//     SmallHoard,
-//     MerchantHoard,
-//     DragonHoard
-// };
-
 enum AbilityType {
     NoAbility=0,
     PassiveAbility,

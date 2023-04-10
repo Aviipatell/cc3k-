@@ -108,3 +108,14 @@ Entity* Cell::getEntity() const {
 bool Cell::getHasEntity() const {
     return this->hasEntity;
 }
+
+bool Cell::getIsStairCase() const {
+    return this->isStairCase;
+}
+
+bool Cell::isNeighbour(Cell* other) const {
+    for (Cell* c : this->neighbours) {
+        if (c == other) return true;
+    }
+    return false;
+}

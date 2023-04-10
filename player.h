@@ -7,56 +7,25 @@ class Enemy;
 
 class Player: public Character {
 
-    int gold;
-    bool hasBarrierSuit;
-    // add a player inventory here
+    protected:
+        double gold;
+        bool hasBarrierSuit;
+    // Add Player Inventory here
 
     public:
-        Player(std::string race);
-
-        void setPlayerPosition();
-
+        // Constructors // TODO: figure out another way if possible?
+        Player(int maxHealth=0, int attack=0, int defence=0, std::string race="");
+        // Setters
+        void setPlayerGold(double gold);
+        // Getters
         int getPlayerGold() const;
-        void setPlayerGold(int val);
 
-        // we'll keep this attack function as a virtual to enable type based attacking in the future.
-        virtual void attack(Enemy& e) = 0;
-        // have virtual inventory/weapon related methods, since race will have specific perks.
+        // Helpers
+        virtual std::string incrementPlayerGold(double gold);
+        virtual std::string attack(Enemy* e);
+        virtual double getScore() const;
+
+        // Inventory/Weapon specific methods go here
 };
-
-
-
-/*
-public:
-    int getPlayerGold();
-    void setPlayerGold(int val);
-    virtual void attack(Enemy &e) = 0;
-    virtual void specialAbility() = 0;
-};
-
-class Human: public Player {
-public:
-    void attack(Enemy &e) override;
-    void specialAbility() override;
-};
-
-class Elf: public Player {
-public:
-    void attack(Enemy &e) override;
-    void specialAbility() override;
-};
-
-class Orc: public Player {
-public:
-    void attack(Enemy &e) override;
-    void specialAbility() override;
-};
-
-class Dwarf: public Player {
-public:
-    void attack(Enemy &e) override;
-    void specialAbility() override;
-};
-*/
 
 #endif
