@@ -19,6 +19,7 @@ enum Direction {
     sw
 };
 
+class Entity;
 class Player;
 class Cell;
 class Item;
@@ -72,12 +73,8 @@ class Game {
         // Getters
 
         // Helpers
-        Player* generatePlayer(PlayerType playerType);
-        PlayerType getPlayerType(int raceSelect);
-        Enemy* generateEnemy(EnemyType enemyType);
-        EnemyType getEnemyType(char enemyType);
-        Item* generateItem(ItemType itemType);
-        ItemType getItemType(char itemType);
+        Player* generatePlayer(int playerType);
+        Entity* generateEntity(char entityType);
 
 
         void loadFloorFromFile();

@@ -3,16 +3,16 @@
 
 #include "character.h"
 
-enum EnemyType {
-    NoEnemy=0,
-    Vampire,
-    Werewolf,
-    Troll,
-    Goblin,
-    Merchant,
-    Dragon,
-    Phoenix
-};
+// enum EnemyType {
+//     NoEnemy=0,
+//     Vampire,
+//     Werewolf,
+//     Troll,
+//     Goblin,
+//     Merchant,
+//     Dragon,
+//     Phoenix
+// };
 
 // modify parsing bounds for additional DLC items
 // enum ItemType {
@@ -38,11 +38,13 @@ enum AbilityType {
 };
 
 class Player;
+class Item;
 
 class Enemy : public Character {
 
     bool isHostile;
-    bool isGuardingItem;
+    bool isGaurdian;
+    std::vector<Item*> guardedItems; // usually be one, but more if spawned next to multiple treasures that need protection
     bool hasItem;
     char itemSymbol;
     bool hasAbility;
@@ -55,20 +57,22 @@ class Enemy : public Character {
 
         // Setters
         void setIsHostile(bool isHostile);
-        void setIsGuardingItem(bool isGuardingItem);
+        void setIsGuardian(bool isGuardian);
         void setHasItem(bool hasItem);
         void setItemType(char itemSymbol);
         void setHasAbility(bool hasAbility);
         void setAbilityType(AbilityType abilityType);
+        void setGuardedItems(std::vector<Item*> guardedItems);
 
         // Getters
         bool getIsHostile() const;
-        bool getIsGuardingItem() const;
+        bool getIsGuardian() const;
         bool getHasCompass() const;
         bool getHasItem() const;
         char getItemSymbol() const;
         bool getHasAbility() const;
         AbilityType getAbilityType() const;
+        std::vector<Item*> getGuardedItems() const;
 
         // Helpers
         virtual void attack(Player* p) = 0;

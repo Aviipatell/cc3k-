@@ -1,5 +1,6 @@
 #include "cell.h"
 
+#include "entity.h"
 // Constructor
 
 Cell::Cell(int row, int column, char symbol) : pos{Position{.row = row, .column = column}}, symbol{symbol} {
@@ -9,7 +10,7 @@ Cell::Cell(int row, int column, char symbol) : pos{Position{.row = row, .column 
 // Setters
 
 void Cell::setFloorType(char symbol) {
-    type = FloorType::Tile; // Maybe set to FloorType::Blank
+    FloorType type;
     switch(symbol) {
         case ' ':
             type = FloorType::Blank;
@@ -21,41 +22,49 @@ void Cell::setFloorType(char symbol) {
         case '+':
             type = FloorType::Door;
             break;
+        case '#':
+            type = FloorType::Passage;
+            break;
         case '.':
             type = FloorType::Tile;
             break;
         case '/':
-            type = FloorType::Staircase;
+            type = FloorType::Tile;
+            isStairCase = true;
             break;
-        case '@':
-            type = FloorType::Player;
-            break;
-        case 'V':
-        case 'W':
-        case 'T':
-        case 'N':
-        case 'M':
-        case 'D':
-        case 'X':
-            type = FloorType::Enemy;
-            break;
-        case '0':
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-        case '6':
-        case '7':
-        case '8':
-        case '9':
-            type = FloorType::Item;
+        default:
+            type = FloorType::Unknown;
             break;
     }
+    if (type == FloorType::Unknown) {
+        this->hasEntity = true;
+        this->type = FloorType::Tile;
+    } else {
+        this->hasEntity = false;
+        this->type = type;
+    }
+}
+
+void Cell::setHasEntity(bool hasEntity) {
+    this->hasEntity = hasEntity;
 }
 
 void Cell::setEntity(Entity* e) {
     this->e = e;
+    // what about reverting back?
+    setSymbol(e->getSymbol());
+}
+
+void Cell::swapEntity(Cell* other) {
+    // swap entities, updating both cells in the process.
+    // make sure you update the entities to hold the new cells they point to
+}
+
+// TODO: swap entities function that swaps the two entities
+
+void Cell::setSymbol(char symbol) {
+    this->symbol = symbol;
+    setFloorType(symbol);
 }
 
 void Cell::setNeighbours(std::vector<Cell*> neighbours) {
@@ -64,11 +73,6 @@ void Cell::setNeighbours(std::vector<Cell*> neighbours) {
 
 void Cell::setIsStairCase(bool isStairCase) {
     this->isStairCase = isStairCase;
-    if (isStairCase) {
-        type = FloorType::Staircase;
-    } else {
-        type = FloorType::Tile;
-    }
 }
 
 void Cell::setChamber(int chamber) {
@@ -93,10 +97,14 @@ FloorType Cell::getType() const {
     return this->type;
 }
 
-std::vector<Cell*> Cell::getNeighbours() {
+std::vector<Cell*> Cell::getNeighbours() const {
     return this->neighbours;
 }
 
-Entity* Cell::getEntity() {
+Entity* Cell::getEntity() const {
     return this->e;
+}
+
+bool Cell::getHasEntity() const {
+    return this->hasEntity;
 }
