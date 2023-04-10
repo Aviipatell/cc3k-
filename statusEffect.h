@@ -20,6 +20,8 @@ class StatusEffect : public Player {
         // Helpers
         int getAttack() override;
         int getDefence() override;
+        StatusDuration getStatusDuration() const;
+        Player* getNext() const;
 };
 
 #endif

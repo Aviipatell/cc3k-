@@ -22,6 +22,7 @@ class Potion : public Item {
     public:
         Potion(char protectorType, bool needsProtection, bool isProtected, char potionType);
 
+        char getSymbol() override;
         void setPotionType(char potionType);
         PotionType getPotionType() const;
         std::string getEffect() const;

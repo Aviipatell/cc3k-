@@ -89,7 +89,72 @@ void Controller::printGame() {
 }
 
 bool Controller::playerAction(char dir1, char dir2, char actionType) {
+    // bool isValid = isValidDirection(dir1, dir2)
 
+    Direction dir = getValidDirection(dir1, dir2);
+
+    if(dir != Direction::NoDirection){
+
+        if(actionType == 'a'){
+            g->attack(dir);
+        }
+        else if(actionType == 'u'){
+            g->usePotion(dir);
+        }
+        else{
+            g->movePlayer(dir);
+        }
+        return true;
+    }
+    else{
+        setMsg("Invalid Input. Please enter a valid direction.");
+    }
+}
+
+Direction Controller::getValidDirection(char dir1, char dir2){
+    if (dir1 == 'n') {
+        if (dir2 == 'o') {
+            return Direction::NO;
+        } else if (dir2 == 'e') {
+            return Direction::NE;
+        } else if (dir2 == 'w') {
+            return Direction::NW;
+        } else {
+            return Direction::NoDirection;
+        }
+    } else if (dir1 == 'e') {
+        if (dir2 == 'a') {
+            return Direction::EA;
+        } else if (dir2 == 'n') {
+            return Direction::NE;
+        } else if (dir2 == 's') {
+            return Direction::SE;
+        } else {
+            return Direction::NoDirection;
+        }
+    } else if (dir1 == 'w') {
+        if (dir2 == 'e') {
+            return Direction::WE;
+        } else if (dir2 == 'n') {
+            return Direction::NW;
+        } else if (dir2 == 's') {
+            return Direction::SW;
+        } else {
+            return Direction::NoDirection;
+        }
+    } else if (dir1 == 's') {
+        if (dir2 == 'o') {
+            return Direction::SO;
+        } else if (dir2 == 'e') {
+            return Direction::SE;
+        } else if (dir2 == 'w') {
+            return Direction::SW;
+        } else {
+            return Direction::NoDirection;
+        }
+    } else {
+        return Direction::NoDirection;
+    }
 }
 
 bool Controller::isGameOver() {
@@ -98,4 +163,8 @@ bool Controller::isGameOver() {
 
 std::string Controller::getMsg() {
     return msg;
+}
+
+void Controller::setMsg(std::string msg) {
+    this->msg = msg;
 }

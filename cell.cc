@@ -50,6 +50,9 @@ void Cell::setHasEntity(bool hasEntity) {
 }
 
 void Cell::setEntity(Entity* e) {
+    if (e == nullptr) {
+
+    } // TODO:
     this->e = e;
     // what about reverting back?
     setSymbol(e->getSymbol());

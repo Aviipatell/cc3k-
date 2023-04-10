@@ -18,3 +18,11 @@ int StatusEffect::getDefence() {
     int defence = next->getDefence();
     return defence;
 }
+
+StatusDuration StatusEffect::getStatusDuration() const {
+    return this->duration;
+}
+
+Player* StatusEffect::getNext() const {
+    return this->next;
+}

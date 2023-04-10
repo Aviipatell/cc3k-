@@ -9,14 +9,15 @@
 #include <sstream>
 
 enum Direction {
-    no,
-    so,
-    ea,
-    we,
-    ne,
-    nw,
-    se,
-    sw
+    NoDirection=0,
+    NO,
+    SO,
+    EA,
+    WE,
+    NE,
+    NW,
+    SE,
+    SW
 };
 
 class Entity;
@@ -52,11 +53,18 @@ class Game {
     Player* generatePlayer(int playerType);
     Entity* generateEntity(char entityType);
 
+    void clearPlayerStatus();
+
     Cell* getRandomEmptyCellFromRandomChamber(std::vector<Cell*> cells, int restrictedChamber = -1);
-    int getIndexOf(Cell* randomCell, std::vector<Cell*> cells);
+    int getIndexOfCell(Cell* randomCell, std::vector<Cell*> cells);
     Cell* getRandomValidNeighbour(Cell* cell);
     Cell* overrideRandomValidNeighbour(Cell* c);
 
+    std::string getDirectionValue(Direction dir);
+    std::string scoutNeighboursForItems(Cell* currentCell);
+
+    Cell* getCellAtDirection(Direction dir);
+    void assignNeighbours();
     void loadFloorFromFile();
     void removeFloorEntities();
     void assignChambers(Cell* c, std::vector<int>& chambers);
@@ -76,9 +84,9 @@ class Game {
         // Getters
         std::string getGameMessage() const;
 
-        void attack(char dir1, char dir2);
-        void usePotion(char dir1, char dir2);
-        void movePlayer(char dir1, char dir2);
+        void attack(Direction dir);
+        void usePotion(Direction dir);
+        void movePlayer(Direction dir);
         void moveEnemies();
         bool isFinished();
 

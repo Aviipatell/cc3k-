@@ -20,10 +20,12 @@ class Controller {
         void quitGame();
         void printGame();
 
+        Direction getValidDirection(char dir1, char dir2);
         bool playerAction(char dir1, char dir2, char actionType = 0);
         bool isGameOver();
 
         std::string getMsg();
+        void setMsg(std::string msg="");
 };
 
 #endif

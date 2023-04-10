@@ -18,6 +18,7 @@ class Gold : public Item {
     public:
         Gold(char protectorType, bool needsProtection, bool isProtected, char goldType);
 
+        char getSymbol() override;
         void setGoldType(char goldType);
 
         GoldType getGoldType() const {

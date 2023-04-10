@@ -39,6 +39,10 @@ void Enemy::setGuardedItems(std::vector<Item*> guardedItems) {
     this->guardedItems = guardedItems;
 }
 
+void Enemy::setHasAlreadyMoved(bool hasAlreadyMoved) const {
+    this->hasAlreadyMoved = hasAlreadyMoved;
+}
+
 // Getters
 
 bool Enemy::getIsHostile() const {
@@ -63,6 +67,10 @@ AbilityType Enemy::getAbilityType() const {
 
 std::vector<Item*> Enemy::getGuardedItems() const {
     return guardedItems;
+}
+
+bool Enemy::getHasAlreadyMoved() const {
+    return hasAlreadyMoved;
 }
 
 // Helpers

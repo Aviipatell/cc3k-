@@ -20,6 +20,7 @@ class Enemy : public Character {
     bool hasItem;
     char itemSymbol;
     bool hasAbility;
+    bool hasAlreadyMoved;
     AbilityType abilityType;
 
     public:
@@ -34,6 +35,7 @@ class Enemy : public Character {
         void setItemSymbol(char itemSymbol);
         void setHasAbility(bool hasAbility);
         void setAbilityType(AbilityType abilityType);
+        void setHasAlreadyMoved(bool hasAlreadyMoved);
         void setGuardedItems(std::vector<Item*> guardedItems);
 
         // Getters
@@ -42,6 +44,7 @@ class Enemy : public Character {
         bool getHasItem() const;
         char getItemSymbol() const;
         bool getHasAbility() const;
+        bool getHasAlreadyMoved() const;
         AbilityType getAbilityType() const;
         std::vector<Item*> getGuardedItems() const;
 

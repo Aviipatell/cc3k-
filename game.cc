@@ -3,6 +3,8 @@
 #include "player.h"
 #include "enemy.h"
 #include "item.h"
+#include "statusEffect.h"
+#include <sstream>
 
 Game::Game(int raceSelect, std::string floorPlanSrc, GameMode mode, std::default_random_engine& rng) :
     floorPlanSrc{floorPlanSrc}, mode{mode}, rng{rng} {
@@ -265,7 +267,7 @@ Player* Game::generatePlayer(int playerType) {
     if (playerType == 0) {
         // Generate Human Player
         p = new Human{};
-    } else if playerType == 1 {
+    } else if (playerType == 1) {
         // Generate Dwarf Player
         p = new Dwarf{};
     } else if (playerType == 2) {
@@ -277,6 +279,16 @@ Player* Game::generatePlayer(int playerType) {
     }
     return p;
  }
+
+void Game::clearPlayerStatus() {
+    StatusEffect* curStatus = dynamic_cast<StatusEffect*>(p);
+    while(curStatus != nullptr) {
+        p = curStatus->getNext();
+        StatusEffect* temp = dynamic_cast<StatusEffect*>(p);
+        delete curStatus;
+        curStatus = temp;
+    }
+}
 
 Entity* Game::generateEntity(char entityType) {
     switch(entityType) {
@@ -377,14 +389,14 @@ Cell* Game::getRandomEmptyCellFromRandomChamber(std::vector<Cell*> cells, int re
     return cells[cellIndex];
 }
 
-int Game::getIndexOf(Cell* cell, std::vector<Cell*> cells) {
+int Game::getIndexOfCell(Cell* cell, std::vector<Cell*> cells) {
     for (int i = 0; i < cells.size(); ++i) {
         if (cell == cells[i]) return i;
     }
     return -1;
 }
 
-Cell* getRandomValidNeighbour(Cell* cell) {
+Cell* Game::getRandomValidNeighbour(Cell* cell) {
     std::vector<Cell*> validNeighbours;
     for (Cell* c : cell->getNeighbours()) {
         if (c->getType() == FloorType::Tile && !c->getHasEntity() && !c->getIsStairCase()) {
@@ -397,7 +409,7 @@ Cell* getRandomValidNeighbour(Cell* cell) {
     return validNeighbours[index];
 }
 
-Cell* overrideRandomValidNeighbour(Cell* c) {
+Cell* Game::overrideRandomValidNeighbour(Cell* c) {
     std::vector<Cell*> selectedNeighbours;
     for (Cell* c : cell->getNeighbours()) {
         if (c->getType() == FloorType::Tile && !c->getIsStairCase()) {
@@ -493,4 +505,116 @@ void Game::setGameMessage(std::string gameMessage) {
 
 std::string Game::getGameMessage() const {
     return this->gameMessage;
+}
+
+std::string getDirectionValue(Direction dir) {
+    if (dir == Direction::NO) {
+        return "North";
+    } else if (dir == Direction::NE) {
+        return "North East";
+    } else if (dir == Direction::EA) {
+        return "East";
+    } else if (dir == Direction::SE) {
+        return "South East";
+    } else if (dir == Direction::SO) {
+        return "South";
+    } else if (dir == Direction::SW) {
+        return "South West";
+    } else if (dir == Direction::WE) {
+        return "West";
+    } else if (dir == Direction::NW) {
+        return "North West";
+    }
+}
+
+void Game::movePlayer(Direction dir){
+    Cell* newCell = getCellAtDirection(dir);
+    Cell* currentCell = p->getCell();
+    std::ostringstream o;
+
+    FloorType type = newCell->getType();
+    std::string direction = getDirectionValue(dir);
+
+    if (type == FloorType::Door || type == FloorType::Passage) {
+        newCell->setEntity(p);
+        currentCell->setEntity(nullptr);
+        p->setCell(newCell);
+    } else if (type == FloorType::Tile) {
+        // check entity
+        if (newCell->getIsStairCase()) {
+            generateNewFloor();
+            o << "PC moved " << direction << " and went down the staircase. PC is on level " << currentFloor<< ". ";
+        } else if (currentCell->getHasEntity()) {
+            // if staircase, move player to that position -> generateNewFloor (check random player)
+            Entity* e = newCell->getEntity();
+            if (e->getSymbol() == 'C') {
+                Item* i = dynamic_cast<Item*>(e);
+                i->useItem(p);
+                deleteEntity(i);
+                newCell->setEntity(p);
+                currentCell->setEntity(nullptr);
+                p->setCell(newCell);
+            } else if (e->getSymbol() == 'G') {
+                // process gold
+                Item* i = dynamic_cast<Item*>(i);
+                if (i->getIsProtected()) {
+                    o << "Gold Hoard is still protected. Can't pick it up. ";
+                } else {
+                    i->useItem(p);
+                    deleteEntity(i);
+                    newCell->setEntity(p);
+                    currentCell->setEntity(nullptr);
+                    p->setCell(newCell);
+                }
+            } else if (e->getSymbol() == 'B') {
+                // process BS
+                Item* i = dynamic_cast<Item*>(e);
+                if (i->getIsProtected()) {
+                    o << "Barrier Suit is still protected. Can't pick it up. ";
+                } else {
+                    i->useItem(p);
+                    deleteEntity(i);
+                    o << "PC equipped barrier suit. ";
+                    newCell->setEntity(p);
+                    currentCell->setEntity(nullptr);
+                    p->setCell(newCell);
+                }
+                // ->
+
+            } else if (e->getSymbol() == 'P') {
+                // process potion
+                o << "PC moved " << direction << " and ran into a potion. Unable to move into potion, try using it instead. ";
+            } else {
+                // move
+                newCell->setEntity(p);
+                currentCell->setEntity(nullptr);
+                p->setCell(newCell);
+            }
+        }
+    } else {
+        int hitHeadDmg = 1;
+        o << "PC tried moving " << direction << " and ran into a wall. PC lost " << hitHeadDmg << " HP. ";
+    }
+
+    // Look for nearby items
+    o <<
+}
+
+std::string Game::scoutNeighboursForItems(Cell* currentCell) {
+    std::string surroundingItems;
+    for (Cell* c : currentCell->getNeighbours()) {
+        if (c->getHasEntity()) {
+            Entity* e = c->getEntity();
+            Item* i = dynamic_cast<Item*>(e);
+            if (i != nullptr) {
+                if (i->getSymbol() == 'C') {
+                    surroundingItems+= "PC"
+                } else if (i->getSymbol() == 'B') {
+
+                } else if (i->getSymbol() == 'G') {
+
+                }
+            }
+        }
+    }
 }

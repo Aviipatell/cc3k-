@@ -72,3 +72,7 @@ std::string Potion::useItem(Player* p) {
     }
     return msg;
 }
+
+char Potion::getSymbol() {
+    return 'P';
+}
