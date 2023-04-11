@@ -6,7 +6,7 @@
 class Player;
 
 enum GoldType {
-    Normal=0,
+    NormalHoard=0,
     SmallHoard,
     MerchantHoard,
     DragonHoard

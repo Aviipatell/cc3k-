@@ -3,7 +3,7 @@
 #include "enemy.h"
 #include "cell.h"
 
-Item::Item(bool needsProtection) : protectorType{protectorType} {};
+Item::Item(bool needsProtection) : needsProtection{needsProtection} {};
 
 void Item::setProtectorType(char protectorType) {
     this->protectorType = protectorType;
@@ -26,7 +26,7 @@ bool Item::getNeedsProtection() const {
 }
 
 bool Item::getIsProtected() const {
-    return getIsProtected;
+    return isProtected;
 }
 
 void Item::checkProtectors(Enemy* enemyToDelete) {

@@ -34,7 +34,7 @@ bool Player::getHasCompass() const {
     return this->hasCompass;
 }
 
-char getSymbol() {
+char Player::getSymbol() {
     return '@';
 }
 

@@ -70,6 +70,8 @@ class Game {
     std::string scoutNeighboursForItems(Cell* currentCell);
     void setMerchantsHostile();
 
+    int getCurrentFloor() const;
+
     Cell* getCellAtDirection(Direction dir);
     void assignNeighbours();
     void loadFloorFromFile();

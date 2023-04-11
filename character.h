@@ -14,7 +14,6 @@ class Character: public Entity {
     public:
         // Constructor
         Character(int maxHealth, int attack, int defence, std::string race);
-        virtual ~Character() = 0;
         // Setters
         void setMaxHealth(int maxHealth);
         void setHealth(int health);

@@ -9,9 +9,10 @@ class Player;
 class Compass : public Item {
     public:
         Compass(bool needsProtection);
+        ~Compass() {};
 
         char getSymbol() override;
-        std::string useItem(Player*) override;
+        std::string useItem(Player* p) override;
 };
 
 #endif

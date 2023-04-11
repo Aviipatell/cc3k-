@@ -2,6 +2,7 @@
 #define _ITEM_H_
 
 #include "entity.h"
+#include <string>
 class Player;
 class Enemy;
 
@@ -13,6 +14,7 @@ class Item: public Entity {
 
 public:
     Item(bool needsProtection);
+    // virtual ~Item() = 0;
 
     void setProtectorType(char protectorType);
     void setNeedsProtection(bool needsProtection);

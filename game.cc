@@ -24,7 +24,7 @@ Game::Game(int raceSelect, std::string floorPlanSrc, GameMode mode, std::default
     floorPlanSrc{floorPlanSrc}, mode{mode}, rng{rng} {
         this->p = generatePlayer(raceSelect);
         if (mode == GameMode::Normal || mode == GameMode::DLC) {
-            floorPlanSrc = "FloorPlans/default.txt";
+            this->floorPlanSrc = "SampleFloorPlan.txt";
         }
         // Generate BS Floor
         std::uniform_int_distribution<unsigned> selectBSFloor(1, 5);
@@ -56,6 +56,8 @@ void Game::generateNewFloor(){
     removeFloorEntities();
     isStairsVisible = false;
     loadFloorFromFile();
+
+    std::cout << "File loaded.." << std::endl;
 
     int index;
     Cell* randomCell;
@@ -194,7 +196,7 @@ void Game::generateNewFloor(){
     }
 }
 
-std::vector<Cell*> getEmptyCellsFromChamber(std::vector<Cell*> cells, int chamber) {
+std::vector<Cell*> Game::getEmptyCellsFromChamber(std::vector<Cell*> cells, int chamber) {
     std::vector<Cell*> emptyCells;
     for (int i = 0; i < cells.size(); ++i) {
         if (cells[i]->getChamber() == chamber && cells[i]->getType() == FloorType::Tile) {
@@ -209,47 +211,59 @@ void Game::loadFloorFromFile() {
     int upperBound = (currentFloor * 5) - 1;
     int lineCount = 0;
 
+    std::cout << "Testing.." << std::endl;
     std::ifstream source{floorPlanSrc};
-    if (source.is_open()) {
-        std::string currentLine;
-        std::vector<int> assignedChambers;
-        while (std::getline(source, currentLine)) {
-            if (lineCount < lowerBound) continue;
-            if (lineCount > upperBound) break;
 
-            // Parse characters in current line
-            std::istringstream iss{currentLine};
-            char currentChar;
-            int row = lineCount - lowerBound;
-            int column = 0;
-            std::vector<Cell*> currentRow;
-            while (iss >> std::noskipws >> currentChar) {
-                Cell* c = new Cell{row, column, currentChar};
-                assignChambers(c, assignedChambers);
-                currentRow.push_back(c);
-                ++column;
+    std::cout << "Testing.." << std::endl;
 
-                if (mode != GameMode::Testing) continue;
 
-                if (!c->getHasEntity()) continue;
+    std::string currentLine;
+    std::vector<int> assignedChambers;
+    while (std::getline(source, currentLine)) {
+        std::cout << currentLine << std::endl;
+        if (lineCount < lowerBound) continue;
+        if (lineCount > upperBound) break;
 
-                if (currentChar == '@') {
-                    p->setCell(c);
-                    c->setEntity(p);
-                } else {
-                    Entity* e = generateEntity(currentChar);
-                    e->setCell(c);
-                    c->setEntity(e);
-                }
+        // Parse characters in current line
+        std::istringstream iss{currentLine};
+        char currentChar;
+        int row = lineCount - lowerBound;
+        int column = 0;
+        std::vector<Cell*> currentRow;
+        while (iss >> std::noskipws >> currentChar) {
+            Cell* c = new Cell{row, column, currentChar};
+            assignChambers(c, assignedChambers);
+            currentRow.push_back(c);
+            ++column;
+
+            if (mode != GameMode::Testing) continue;
+
+            if (!c->getHasEntity()) continue;
+
+            if (currentChar == '@') {
+                p->setCell(c);
+                c->setEntity(p);
+            } else {
+                Entity* e = generateEntity(currentChar);
+                e->setCell(c);
+                c->setEntity(e);
             }
-            // add row of cells to the floor
-            floor.push_back(currentRow);
-            ++lineCount;
         }
-        source.close();
-    } else {
-        std::cout << "Unable to open file." << std::endl;
+        // add row of cells to the floor
+        floor.push_back(currentRow);
+        ++lineCount;
     }
+    source.close();
+
+    std::cout << "Testing.." << std::endl;
+    std::cout << "Floor size: " << floor.size() << std::endl;
+
+    // if (source.is_open()) {
+
+    //     source.close();
+    // } else {
+    //     std::cout << "Unable to open file." << std::endl;
+    // }
 
     // Set up Guardian enemies
     if (mode == GameMode::Testing) {
@@ -267,6 +281,40 @@ void Game::loadFloorFromFile() {
             }
         }
     }
+}
+
+void Game::print() {
+    int sizeHeight = this->floor.size();
+    int sizeWidth = this->floor[0].size();
+    // ANSI colour codes
+    const std::string grey("\033[0;90m");
+    const std::string brown("\033[0;33m");
+    const std::string playerGreen("\e[1;92m");
+    const std::string floorGreen("\e[0;32m");
+    const std::string black("\033[0;30m");
+
+    // original colour
+    const std::string reset("\033[0m");
+
+    for (int i = 0; i < sizeHeight; ++i) {
+        for (int j = 0; j < sizeWidth; ++j) {
+            char symbol = floor[i][j]->getSymbol();
+            if (symbol == '.') std::cout << floorGreen;
+            else if (symbol == ' ') std::cout << black;
+            else if (symbol == '#') std::cout << grey;
+            else if (symbol == '@') std::cout << playerGreen;
+            else if (symbol == '|' || symbol == '-') std::cout << brown;
+            std::cout << symbol << reset;
+        }
+        std::cout << std::endl;
+    }
+    std::cout << "Race: " << p->getRace() << " ";
+    std::cout << "Gold: " << p->getPlayerGold() << " ";
+    std::cout << "Floor: " << getCurrentFloor() << std::endl;
+    std::cout << "HP: " << p->getHealth() << std::endl;
+    std::cout << "Atk: " << p->getAttack() << std::endl;
+    std::cout << "Def: " << p->getDefence() << std::endl;
+    std::cout << "Action: " << getGameMessage() << std::endl;
 }
 
 Player* Game::generatePlayer(int playerType) {
@@ -294,89 +342,96 @@ void Game::clearPlayerStatus() {
 }
 
 Entity* Game::generateEntity(char entityType) {
+    Enemy* enemy = nullptr;
+    Item* item = nullptr;
     switch(entityType) {
         case 'V':
-            Enemy* v = new Vampire{};
-            enemies.push_back(v);
-            return v;
+            enemy = new Vampire{};
+            enemies.push_back(enemy);
+            break;
         case 'W':
-            Enemy* w = new Werewolf{};
-            enemies.push_back(w);
-            return w;
+            enemy = new Werewolf{};
+            enemies.push_back(enemy);
+            break;
         case 'T':
-            Enemy* t = new Troll{};
-            enemies.push_back(t);
-            return t;
+            enemy = new Troll{};
+            enemies.push_back(enemy);
+            break;
         case 'N':
-            Enemy* n = new Goblin{};
-            enemies.push_back(n);
-            return n;
+            enemy = new Goblin{};
+            enemies.push_back(enemy);
+            break;
         case 'M':
-            Enemy* m = new Merchant{};
-            m->setIsHostile(isMerchantHostile);
-            m->setHasItem(true);
-            m->setItemSymbol('8');
-            enemies.push_back(m);
-            return m;
+            enemy = new Merchant{};
+            enemy->setIsHostile(isMerchantHostile);
+            enemy->setHasItem(true);
+            enemy->setItemSymbol('8');
+            enemies.push_back(enemy);
+            break;
         case 'D':
-            Enemy* d = new Dragon{};
-            d->setIsGuardian(true);
-            enemies.push_back(d);
-            return d;
+            enemy = new Dragon{};
+            enemy->setIsGuardian(true);
+            enemies.push_back(enemy);
+            break;
         case 'X':
-            Enemy* x = new Phoenix{};
-            enemies.push_back(x);
-            return x;
+            enemy = new Phoenix{};
+            enemies.push_back(enemy);
+            break;
         case 'C':
-            Item* c = new Compass{false};
-            items.push_back(c);
-            return c;
+            item = new Compass{false};
+            items.push_back(item);
+            break;
         case 'B':
-            Item* b = new BarrierSuit{true};
-            b->setProtectorType('D');
-            items.push_back(b);
-            return b;
+            item = new BarrierSuit{true};
+            item->setProtectorType('D');
+            items.push_back(item);
+            break;
         case '0':
-            Potion* p = new Potion{false, PotionType::RHPotion};
-            items.push_back(p);
-            return p;
+            item = new Potion{false, entityType};
+            items.push_back(item);
+            break;
         case '1':
-            Potion* p = new Potion{false, PotionType::BAPotion};
-            items.push_back(p);
-            return p;
+            item = new Potion{false, entityType};
+            items.push_back(item);
+            break;
         case '2':
-            Potion* p = new Potion{false, PotionType::BDPotion};
-            items.push_back(p);
-            return p;
+            item = new Potion{false, entityType};
+            items.push_back(item);
+            break;
         case '3':
-            Potion* p = new Potion{false, PotionType::PHPotion};
-            items.push_back(p);
-            return p;
+            item = new Potion{false, entityType};
+            items.push_back(item);
+            break;
         case '4':
-            Potion* p = new Potion{false, PotionType::WAPotion};
-            items.push_back(p);
-            return p;
+            item = new Potion{false, entityType};
+            items.push_back(item);
+            break;
         case '5':
-            Potion* p = new Potion{false, PotionType::WDPotion};
-            items.push_back(p);
-            return p;
+            item = new Potion{false, entityType};
+            items.push_back(item);
+            break;
         case '6':
-            Gold* g = new Gold{false, GoldType::Normal};
-            items.push_back(g);
-            return g;
+            item = new Gold{false, entityType};
+            items.push_back(item);
+            break;
         case '7':
-            Gold* g = new Gold{false, GoldType::SmallHoard};
-            items.push_back(g);
-            return g;
+            item = new Gold{false, entityType};
+            items.push_back(item);
+            break;
         case '8':
-            Gold* g = new Gold(false, GoldType::MerchantHoard);
-            items.push_back(g);
-            return g;
+            item = new Gold(false, entityType);
+            items.push_back(item);
+            break;
         case '9':
-            Gold* g = new Gold(true, GoldType::DragonHoard);
-            g->setProtectorType('D');
-            items.push_back(g);
-            return g;
+            item = new Gold(true, entityType);
+            item->setProtectorType('D');
+            items.push_back(item);
+            break;
+    }
+    if (enemy != nullptr) {
+        return enemy;
+    } else {
+        return item;
     }
 }
 
@@ -519,7 +574,7 @@ std::string Game::getGameMessage() const {
     return this->gameMessage;
 }
 
-std::string getDirectionValue(Direction dir) {
+std::string Game::getDirectionValue(Direction dir) {
     if (dir == Direction::NO) {
         return "North";
     } else if (dir == Direction::NE) {
@@ -882,4 +937,8 @@ void Game::deleteEntity(Entity* e) {
         }
         delete enemyToDelete;
     }
+}
+
+int Game::getCurrentFloor() const {
+    return currentFloor;
 }

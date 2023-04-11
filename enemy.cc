@@ -28,7 +28,7 @@ void Enemy::setItemSymbol(char itemSymbol) {
 }
 
 void Enemy::setHasAbility(bool hasAbility) {
-    this->hasAbility = hasAbility;
+    // this->hasAbility = hasAbility;
 }
 
 void Enemy::setAbilityType(AbilityType aType) {
@@ -71,6 +71,10 @@ std::vector<Item*> Enemy::getGuardedItems() const {
 
 bool Enemy::getHasAlreadyMoved() const {
     return hasAlreadyMoved;
+}
+
+bool Enemy::getIsGuardian() const {
+    return isGuardian;
 }
 
 // Helpers

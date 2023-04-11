@@ -15,8 +15,8 @@ class Player: public Character {
 
     public:
         // Constructors
-        Player(); // to enable StatusEffect Decorator
-        Player(int maxHealth, int attack, int defence, std::string race);
+        // Player(); // to enable StatusEffect Decorator
+        Player(int maxHealth=0, int attack=0, int defence=0, std::string race="");
         // Setters
         void setPlayerGold(double gold);
         void setHasBarrierSuit(bool hasBarrierSuit);

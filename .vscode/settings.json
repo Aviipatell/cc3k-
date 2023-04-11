@@ -66,6 +66,7 @@
     "stack": "cpp",
     "numeric": "cpp",
     "random": "cpp",
-    "filesystem": "cpp"
+    "filesystem": "cpp",
+    "barrier": "cpp"
   }
 }

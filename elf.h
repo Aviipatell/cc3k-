@@ -6,6 +6,7 @@
 class Elf : public Player {
     public:
         Elf(int maxHealth=140, int attack=30, int defence=10, std::string race="Elf");
+        ~Elf() {};
 };
 
 #endif

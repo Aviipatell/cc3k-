@@ -10,7 +10,7 @@ class BarrierSuit : public Item {
     public:
         BarrierSuit(bool needsProtection);
         char getSymbol() override;
-        std::string useItem(Player*) override;
+        std::string useItem(Player* p) override;
 };
 
 #endif

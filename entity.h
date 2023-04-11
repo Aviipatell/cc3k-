@@ -7,6 +7,7 @@ class Entity {
     Cell* c;
 public:
     // virtual ~Entity() = 0;
+    virtual ~Entity() {};
 
     virtual char getSymbol() = 0;
     Cell* getCell();

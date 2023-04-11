@@ -1,6 +1,5 @@
 #include <sstream>
 #include "phoenix.h"
-
 #include "player.h"
 
 

@@ -64,6 +64,8 @@ void Controller::startGame() {
     }
 
     Game* g = new Game{raceSelect-1, floorPlanSrc, mode, rng};
+    printGame();
+    std::cout << "GAME PRINTED???" << std::endl;
 }
 
 void Controller::restartGame() {
@@ -81,7 +83,7 @@ void Controller::quitGame() {
 
 //TODO: need to implement
 void Controller::printGame() {
-
+    g->print();
 }
 
 bool Controller::playerAction(char dir1, char dir2, char actionType) {

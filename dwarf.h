@@ -6,6 +6,7 @@
 class Dwarf : public Player {
     public:
         Dwarf(int maxHealth=100, int attack=20, int defence=30, std::string race="Dwarf");
+        ~Dwarf() {};
         std::string incrementPlayerGold(double gold) override;
 };
 

@@ -18,7 +18,7 @@ int Gold::getGoldAmount() const {
 void Gold::setGoldType(char type) {
     GoldType goldType;
     if (type == '6') {
-        goldType = GoldType::Normal;
+        goldType = GoldType::NormalHoard;
         amount = 1;
     } else if (type == '7') {
         goldType = GoldType::SmallHoard;
@@ -44,6 +44,6 @@ std::string Gold::useItem(Player* p) {
     return o.str();
 }
 
-char getSymbol() {
+char Gold::getSymbol() {
     return 'G';
 }

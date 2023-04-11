@@ -2,6 +2,7 @@
 #define _GOBLIN_H_
 
 #include "enemy.h"
+#include <vector>
 
 class Goblin : public Enemy {
     public:
