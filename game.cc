@@ -9,6 +9,7 @@
 #include "elf.h"
 #include "orc.h"
 #include "gold.h"
+#include "compass.h"
 #include "barrierSuit.h"
 #include "dragon.h"
 #include "vampire.h"
@@ -47,7 +48,7 @@ std::vector<Cell*> Game::getEmptyCells() {
 void Game::generateNewFloor(){
     ++currentFloor;
     if (currentFloor > 5) {
-        std::cout << "You win." << std::endl; // TODO: remove
+        std::cout << "You win." << std::endl;
         isOver = true;
         return;
     }
@@ -64,8 +65,8 @@ void Game::generateNewFloor(){
     if (mode != GameMode::Testing) {
 
         // Player position
-        randomCell = getRandomEmptyCellFromRandomChamber(cells); // TODO:
-        index = getIndexOfCell(randomCell, cells); // TODO:
+        randomCell = getRandomEmptyCellFromRandomChamber(cells);
+        index = getIndexOfCell(randomCell, cells);
         p->setCell(randomCell);
         randomCell->setEntity(p);
         cells.erase(cells.begin() + index);
@@ -137,7 +138,7 @@ void Game::generateNewFloor(){
 
                 std::vector<Item*> guardingItems;
                 for (Item* i2: items) {
-                    if (i2->getNeedsProtection() && i2 != i && randomCell->isNeighbour(i2->getCell())) { // TODO:
+                    if (i2->getNeedsProtection() && i2 != i && randomCell->isNeighbour(i2->getCell())) {
                         guardingItems.push_back(i2);
                     }
                 }
@@ -188,12 +189,15 @@ void Game::generateNewFloor(){
     enemies[compassIndex]->setItemSymbol('C'); // TODO: needs functional delete enemies
 
     // TODO: set game action msg
+    if (currentFloor == 1) {
+        setGameMessage("Player has spawned.");
+    }
 }
 
 std::vector<Cell*> getEmptyCellsFromChamber(std::vector<Cell*> cells, int chamber) {
     std::vector<Cell*> emptyCells;
     for (int i = 0; i < cells.size(); ++i) {
-        if (cells[i]->getChamber() == chamber && cells[i]->getType() == FloorType::tile) {
+        if (cells[i]->getChamber() == chamber && cells[i]->getType() == FloorType::Tile) {
             emptyCells.push_back(cells[i]);
         }
     }
@@ -268,16 +272,12 @@ void Game::loadFloorFromFile() {
 Player* Game::generatePlayer(int playerType) {
     Player* p;
     if (playerType == 0) {
-        // Generate Human Player
         p = new Human{};
     } else if (playerType == 1) {
-        // Generate Dwarf Player
         p = new Dwarf{};
     } else if (playerType == 2) {
-        // Generate Elf Player
         p = new Elf{};
     } else {
-        // Generate Orc Player
         p = new Orc{};
     }
     return p;
@@ -294,7 +294,6 @@ void Game::clearPlayerStatus() {
 }
 
 Entity* Game::generateEntity(char entityType) {
-
     switch(entityType) {
         case 'V':
             Enemy* v = new Vampire{};
@@ -315,6 +314,8 @@ Entity* Game::generateEntity(char entityType) {
         case 'M':
             Enemy* m = new Merchant{};
             m->setIsHostile(isMerchantHostile);
+            m->setHasItem(true);
+            m->setItemSymbol('8');
             enemies.push_back(m);
             return m;
         case 'D':
@@ -327,51 +328,53 @@ Entity* Game::generateEntity(char entityType) {
             enemies.push_back(x);
             return x;
         case 'C':
-            Item* c = new Compass{0, false, false};
+            Item* c = new Compass{false};
             items.push_back(c);
             return c;
         case 'B':
-            Item* b = new BarrierSuit{'D', true, false};
+            Item* b = new BarrierSuit{true};
+            b->setProtectorType('D');
             items.push_back(b);
             return b;
         case '0':
-            Potion* p = new Potion{PotionType::RHPotion};
+            Potion* p = new Potion{false, PotionType::RHPotion};
             items.push_back(p);
             return p;
         case '1':
-            Potion* p = new Potion{PotionType::BAPotion};
+            Potion* p = new Potion{false, PotionType::BAPotion};
             items.push_back(p);
             return p;
         case '2':
-            Potion* p = new Potion{PotionType::BDPotion};
+            Potion* p = new Potion{false, PotionType::BDPotion};
             items.push_back(p);
             return p;
         case '3':
-            Potion* p = new Potion{PotionType::PHPotion};
+            Potion* p = new Potion{false, PotionType::PHPotion};
             items.push_back(p);
             return p;
         case '4':
-            Potion* p = new Potion{PotionType::WAPotion};
+            Potion* p = new Potion{false, PotionType::WAPotion};
             items.push_back(p);
             return p;
         case '5':
-            Potion* p = new Potion{PotionType::WDPotion};
+            Potion* p = new Potion{false, PotionType::WDPotion};
             items.push_back(p);
             return p;
         case '6':
-            Gold* g = new Gold{GoldType::Normal};
+            Gold* g = new Gold{false, GoldType::Normal};
             items.push_back(g);
             return g;
         case '7':
-            Gold* g = new Gold{GoldType::SmallHoard};
+            Gold* g = new Gold{false, GoldType::SmallHoard};
             items.push_back(g);
             return g;
         case '8':
-            Gold* g = new Gold(GoldType::MerchantHoard);
+            Gold* g = new Gold(false, GoldType::MerchantHoard);
             items.push_back(g);
             return g;
         case '9':
-            Gold* g = new Gold(GoldType::DragonHoard, 'D', true, false);
+            Gold* g = new Gold(true, GoldType::DragonHoard);
+            g->setProtectorType('D');
             items.push_back(g);
             return g;
     }
@@ -432,22 +435,6 @@ Cell* Game::getRandomValidNeighbour(Cell* cell) {
     std::uniform_int_distribution<unsigned> selectNeighbour(0, validNeighbours.size() - 1);
     int index = selectNeighbour(rng);
     return validNeighbours[index];
-}
-
-Cell* Game::overrideRandomValidNeighbour(Cell* c) {
-    std::vector<Cell*> selectedNeighbours;
-    for (Cell* c : cell->getNeighbours()) {
-        if (c->getType() == FloorType::Tile && !c->getIsStairCase()) {
-                if (c->getHasEntity()) {
-                    Entity* e = c->getEntity();
-                    if (e->getSymbol() == 'P' || e->getSymbol() == 'G') {
-                        deleteEntity(e); // TODO: create this function
-                        c->setHasEntity(false);
-                        selectedNeighbours.push_back(c);
-                    }
-                }
-        }
-    }
 }
 
 void Game::assignChambers(Cell* c, std::vector<int>& chambers) {
@@ -553,6 +540,8 @@ std::string getDirectionValue(Direction dir) {
 }
 
 void Game::movePlayer(Direction dir){
+    setGameMessage("");
+
     Cell* newCell = getCellAtDirection(dir);
     Cell* currentCell = p->getCell();
     std::ostringstream o;
@@ -604,8 +593,6 @@ void Game::movePlayer(Direction dir){
                     currentCell->setEntity(nullptr);
                     p->setCell(newCell);
                 }
-                // ->
-
             } else if (e->getSymbol() == 'P') {
                 // process potion
                 o << "PC moved " << direction << " and ran into a potion. Unable to move into potion, try using it instead. ";
@@ -623,6 +610,8 @@ void Game::movePlayer(Direction dir){
 
     // Look for nearby items
     o << scoutNeighboursForItems(newCell);
+    setGameMessage(o.str());
+    moveEnemies();
 }
 
 std::string Game::scoutNeighboursForItems(Cell* currentCell) {
@@ -635,9 +624,9 @@ std::string Game::scoutNeighboursForItems(Cell* currentCell) {
                 if (i->getSymbol() == 'C') {
                     surroundingItems+= "PC sees a Compass. ";
                 } else if (i->getSymbol() == 'B') {
-                    surroundingItems+= "PC sees a Barrier Suit. "
+                    surroundingItems+= "PC sees a Barrier Suit. ";
                 } else if (i->getSymbol() == 'G') {
-                    surroundingItems+= "PC sees Gold. "
+                    surroundingItems+= "PC sees Gold. ";
                 } else if (i->getSymbol() == 'P') {
                     Potion* p = dynamic_cast<Potion*>(i);
                     if (p != nullptr) {
@@ -679,12 +668,17 @@ bool Game::isKnownPotion(PotionType potion) {
 }
 
 void Game::attack(Direction dir) {
+    setGameMessage("");
 
     Cell* c = getCellAtDirection(dir);
     Enemy* enemy = dynamic_cast<Enemy*>(c->getEntity());
     std::ostringstream o;
 
     if (enemy != nullptr) {
+        if (enemy->getSymbol() == 'M' && !isMerchantHostile) {
+            isMerchantHostile = true;
+            setMerchantsHostile();
+        }
         std::string attackMessage = p->attack(enemy);
 
         if(enemy->getHealth() == 0){
@@ -697,6 +691,14 @@ void Game::attack(Direction dir) {
     }
     setGameMessage(o.str());
     moveEnemies();
+}
+
+void Game::setMerchantsHostile() {
+    for (Enemy* e : enemies) {
+        if (e->getSymbol() == 'M') {
+            e->setIsHostile(true);
+        }
+    }
 }
 
 void Game::assignNeighbours() {
@@ -761,6 +763,8 @@ Cell* Game::getCellAtDirection(Direction dir) {
 }
 
 void Game::usePotion(Direction dir) {
+    setGameMessage("");
+
     Cell* c = getCellAtDirection(dir);
     Potion* potion = dynamic_cast<Potion*>(c->getEntity());
     std::ostringstream o;
@@ -832,7 +836,50 @@ void Game::moveEnemies() {
         }
     }
 
+    // reset movement
     for (Enemy* e : enemies) {
         e->setHasAlreadyMoved(false);
+    }
+}
+
+
+
+void Game::deleteEntity(Entity* e) {
+    if (dynamic_cast<Item*>(e)) {
+        Item* itemToDelete = dynamic_cast<Item*>(e);
+        for (int i = 0; i < items.size(); ++i) {
+            if (items[i] == itemToDelete) {
+                items.erase(items.begin() + i);
+                break;
+            }
+        }
+        delete itemToDelete;
+    } else {
+        Enemy* enemyToDelete = dynamic_cast<Enemy*>(e);
+        for (int i = 0; i < enemies.size(); ++i) {
+            if (enemies[i] == enemyToDelete) {
+                enemies.erase(enemies.begin() + i);
+                break;
+            }
+        }
+        if (enemyToDelete->getIsGuardian()) {
+            std::vector<Item*> protectedItems = enemyToDelete->getGuardedItems();
+            for (Item* item : protectedItems) {
+                item->checkProtectors(enemyToDelete);
+            }
+        }
+        if (enemyToDelete->getHasItem()) {
+            Entity* e = generateEntity(enemyToDelete->getItemSymbol());
+            Item* i = dynamic_cast<Item*>(e);
+            if (i == nullptr) {
+                delete e;
+            } else {
+                items.push_back(i);
+                Cell* currentCell = enemyToDelete->getCell();
+                currentCell->setEntity(i);
+                i->setCell(currentCell);
+            }
+        }
+        delete enemyToDelete;
     }
 }

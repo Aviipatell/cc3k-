@@ -1,7 +1,7 @@
 #include "barrierSuit.h"
 #include "player.h";
 
-BarrierSuit::BarrierSuit(char protectorType, bool needsProtection, bool isProtected) : Item{protectorType, needsProtection, isProtected} {};
+BarrierSuit::BarrierSuit(bool needsProtection) : Item{needsProtection} {};
 
 char BarrierSuit::getSymbol() {
     return 'B';

@@ -57,6 +57,7 @@ class Game {
     // Private helpers
     Player* generatePlayer(int playerType);
     Entity* generateEntity(char entityType);
+    void deleteEntity(Entity* e);
 
     void clearPlayerStatus();
 
@@ -67,6 +68,7 @@ class Game {
 
     std::string getDirectionValue(Direction dir);
     std::string scoutNeighboursForItems(Cell* currentCell);
+    void setMerchantsHostile();
 
     Cell* getCellAtDirection(Direction dir);
     void assignNeighbours();

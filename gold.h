@@ -3,7 +3,7 @@
 
 #include "item.h"
 
-class Player; // TODO: remember to go back and set up forward declaration in headers to avoid circular dependencies
+class Player;
 
 enum GoldType {
     Normal=0,
@@ -14,17 +14,17 @@ enum GoldType {
 
 class Gold : public Item {
     GoldType goldType;
-    double amount = 1;
+    double amount;
     public:
-        Gold(char goldType,char protectorType='0', bool needsProtection=false, bool isProtected=false);
+        Gold(bool needsProtection, char type);
+
+        void setGoldType(char goldType);
+        void setGoldAmount(int amount);
+        int getGoldAmount() const;
+        GoldType getGoldType() const;
+
 
         char getSymbol() override;
-        void setGoldType(char goldType);
-
-        GoldType getGoldType() const {
-            return goldType;
-        }
-
         std::string useItem(Player* p) override;
 };
 

@@ -10,9 +10,8 @@ class Werewolf : public Enemy {
         // Getters
         char getSymbol() override;
 
-        // Helpers (for special functionality)
-        // std::string attack(Player* p) override;
-        // std::string specialAbility(Player* p = nullptr) override;
+        // Helpers
+        std::string specialAbility(Player* p = nullptr) override;
 };
 
 #endif

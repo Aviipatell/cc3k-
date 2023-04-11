@@ -5,7 +5,6 @@ StatusEffect::StatusEffect(Player* next, StatusDuration duration) : next{next}, 
 
 // Destructor
 StatusEffect::~StatusEffect() {
-    // TODO: set up cool logic here to selectively destroy
     delete next;
 }
 

@@ -1,7 +1,9 @@
 #ifndef _ITEM_H_
 #define _ITEM_H_
 
-class Entity;
+#include "entity.h"
+class Player;
+class Enemy;
 
 class Item: public Entity {
 
@@ -10,7 +12,7 @@ class Item: public Entity {
     bool isProtected;
 
 public:
-    Item(char protectorType, bool needsProtection, bool isProtected);
+    Item(bool needsProtection);
 
     void setProtectorType(char protectorType);
     void setNeedsProtection(bool needsProtection);
@@ -20,7 +22,7 @@ public:
     bool getNeedsProtection() const;
     bool getIsProtected() const;
 
-    void checkProtectors(); // scan neighbours of item to see if any enemies that are isGaurding are alive.
+    void checkProtectors(Enemy* enemyToDelete);
     virtual std::string useItem(Player* p) = 0;
 };
 

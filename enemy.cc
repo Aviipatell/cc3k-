@@ -16,7 +16,7 @@ void Enemy::setIsHostile(bool isHostile) {
 }
 
 void Enemy::setIsGuardian(bool isGuardian) {
-    this->isGaurdian = isGuardian;
+    this->isGuardian = isGuardian;
 }
 
 void Enemy::setHasItem(bool hasItem) {
@@ -31,8 +31,8 @@ void Enemy::setHasAbility(bool hasAbility) {
     this->hasAbility = hasAbility;
 }
 
-void Enemy::setAbilityType(AbilityType abilityType) {
-    this->abilityType = abilityType;
+void Enemy::setAbilityType(AbilityType aType) {
+    this->aType = aType;
 }
 
 void Enemy::setGuardedItems(std::vector<Item*> guardedItems) {
@@ -62,7 +62,7 @@ bool Enemy::getHasAbility() const {
 }
 
 AbilityType Enemy::getAbilityType() const {
-    return abilityType;
+    return aType;
 }
 
 std::vector<Item*> Enemy::getGuardedItems() const {

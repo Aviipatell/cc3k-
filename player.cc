@@ -16,6 +16,10 @@ void Player::setHasBarrierSuit(bool hasBarrierSuit) {
     this->hasBarrierSuit = hasBarrierSuit;
 }
 
+void Player::setHasCompass(bool hasCompass) {
+    this->hasCompass = hasCompass;
+}
+
 // Getters
 
 int Player::getPlayerGold() const {
@@ -24,6 +28,10 @@ int Player::getPlayerGold() const {
 
 bool Player::getHasBarrierSuit() const {
     return this->hasBarrierSuit;
+}
+
+bool Player::getHasCompass() const {
+    return this->hasCompass;
 }
 
 char getSymbol() {

@@ -3,26 +3,34 @@
 
 #include "player.h"
 
-Gold::Gold(char protectorType, bool needsProtection, bool isProtected, char goldType) : Item{protectorType, needsProtection, isProtected} {
-    setGoldType(goldType);
-};
+Gold::Gold(bool needsProtection, char type) : Item{needsProtection} {
+    setGoldType(type);
+}
 
-void Gold::setGoldType(char goldType) {
-    GoldType type;
-    if (goldType == '6') {
-        type = GoldType::Normal;
+void Gold::setGoldAmount(int amount) {
+    this->amount = amount;
+}
+
+int Gold::getGoldAmount() const {
+    return this->amount;
+}
+
+void Gold::setGoldType(char type) {
+    GoldType goldType;
+    if (type == '6') {
+        goldType = GoldType::Normal;
         amount = 1;
-    } else if (goldType == '7') {
-        type = GoldType::SmallHoard;
+    } else if (type == '7') {
+        goldType = GoldType::SmallHoard;
         amount = 2;
-    } else if (goldType == '8') {
-        type = GoldType::MerchantHoard;
+    } else if (type == '8') {
+        goldType = GoldType::MerchantHoard;
         amount = 4;
-    } else if (goldType == '9') {
-        type = GoldType::DragonHoard;
+    } else if (type == '9') {
+        goldType = GoldType::DragonHoard;
         amount = 6;
     }
-    this->goldType = type;
+    this->goldType = goldType;
 }
 
 GoldType Gold::getGoldType() const {
@@ -34,4 +42,8 @@ std::string Gold::useItem(Player* p) {
 
     o << p->incrementPlayerGold(amount);
     return o.str();
+}
+
+char getSymbol() {
+    return 'G';
 }

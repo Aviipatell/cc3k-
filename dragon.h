@@ -11,8 +11,7 @@ class Dragon : public Enemy {
         char getSymbol() override;
 
         // Helpers
-        // std::string attack(Player* p) override;
-        // std::string specialAbility(Player* p = nullptr) override;
+        std::string specialAbility(Player* p = nullptr) override;
 };
 
 #endif

@@ -1,4 +1,5 @@
 #include "potion.h"
+
 #include "rhStatus.h"
 #include "baStatus.h"
 #include "bdStatus.h"
@@ -6,26 +7,26 @@
 #include "waStatus.h"
 #include "wdStatus.h"
 
-Potion::Potion(char protectorType, bool needsProtection, bool isProtected, char potionType) : Item{protectorType, needsProtection, isProtected} {
-    setPotionType(potionType);
+Potion::Potion(bool needsProtection, char type) : Item{needsProtection} {
+    setPotionType(type);
 };
 
-void Potion::setPotionType(char potionType) {
-    PotionType type;
-    if (potionType == '0') {
-        type = PotionType::RHPotion;
-    } else if (potionType == '1') {
-        type = PotionType::BAPotion;
-    } else if (potionType == '2') {
-        type = PotionType::BDPotion;
-    } else if (potionType == '3') {
-        type = PotionType::PHPotion;
-    } else if (potionType == '4') {
-        type = PotionType::WAPotion;
+void Potion::setPotionType(char type) {
+    PotionType potionType;
+    if (type == '0') {
+        potionType = PotionType::RHPotion;
+    } else if (type == '1') {
+        potionType = PotionType::BAPotion;
+    } else if (type == '2') {
+        potionType = PotionType::BDPotion;
+    } else if (type == '3') {
+        potionType = PotionType::PHPotion;
+    } else if (type == '4') {
+        potionType = PotionType::WAPotion;
     } else {
-        type = PotionType::WDPotion;
+        potionType = PotionType::WDPotion;
     }
-    this->potionType = type;
+    this->potionType = potionType;
 }
 
 PotionType Potion::getPotionType() const {

@@ -12,6 +12,6 @@ char Werewolf::getSymbol() {
     return 'W';
 }
 
-// std::string Werewolf::specialAbility(Player* p) {
-//
-// }
+std::string Werewolf::specialAbility(Player* p) {
+    return "";
+}

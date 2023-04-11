@@ -8,7 +8,8 @@ class Player;
 
 class Compass : public Item {
     public:
-        Compass(char protectorType, bool needsProtection, bool isProtected);
+        Compass(bool needsProtection);
+
         char getSymbol() override;
         std::string useItem(Player*) override;
 };

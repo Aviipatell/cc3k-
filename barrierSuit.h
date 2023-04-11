@@ -8,7 +8,7 @@ class Player;
 
 class BarrierSuit : public Item {
     public:
-        BarrierSuit(char protectorType, bool needsProtection, bool isProtected);
+        BarrierSuit(bool needsProtection);
         char getSymbol() override;
         std::string useItem(Player*) override;
 };

@@ -15,28 +15,30 @@ class Item;
 class Enemy : public Character {
 
     bool isHostile = true;
-    bool isGaurdian;
-    std::vector<Item*> guardedItems; // 1..*
-    bool hasItem;
+    bool isGuardian = false;
+    bool hasItem = false;
     char itemSymbol;
-    bool hasAbility;
-    bool hasAlreadyMoved;
-    AbilityType abilityType;
+
+    std::vector<Item*> guardedItems; // 1..*
+
+    bool hasAbility = false;
+    AbilityType aType = AbilityType::NoAbility;
+
+    bool hasAlreadyMoved = false;
 
     public:
         // Constructor
         Enemy(int maxHealth, int attack, int defence, std::string race);
-        // shouldn't need to create pure virutal dtor, bc superclass dtor carries over
 
         // Setters
         void setIsHostile(bool isHostile);
         void setIsGuardian(bool isGuardian);
         void setHasItem(bool hasItem);
         void setItemSymbol(char itemSymbol);
-        void setHasAbility(bool hasAbility);
-        void setAbilityType(AbilityType abilityType);
-        void setHasAlreadyMoved(bool hasAlreadyMoved);
         void setGuardedItems(std::vector<Item*> guardedItems);
+        void setHasAbility(bool hasAbility);
+        void setAbilityType(AbilityType aType);
+        void setHasAlreadyMoved(bool hasAlreadyMoved);
 
         // Getters
         bool getIsHostile() const;

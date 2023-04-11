@@ -1,9 +1,9 @@
 #include "item.h"
-#include "entity.h"
-#include "cell.h" // might cause issue?
-#include "enemy.h"
 
-Item::Item(char protectorType, bool needsProtection, bool isProtected) : protectorType{protectorType}, needsProtection{needsProtection}, isProtected{isProtected} {};
+#include "enemy.h"
+#include "cell.h"
+
+Item::Item(bool needsProtection) : protectorType{protectorType} {};
 
 void Item::setProtectorType(char protectorType) {
     this->protectorType = protectorType;
@@ -29,7 +29,7 @@ bool Item::getIsProtected() const {
     return getIsProtected;
 }
 
-void Item::checkProtectors() {
+void Item::checkProtectors(Enemy* enemyToDelete) {
     if (!needsProtection) return;
     Cell* c = getCell();
     std::vector<Cell*> neighbours = c->getNeighbours();
@@ -38,7 +38,7 @@ void Item::checkProtectors() {
         Entity* e = c->getEntity();
         if (e == nullptr) continue;
         Enemy* enemy = dynamic_cast<Enemy*>(e);
-        if (enemy != nullptr && enemy->getIsGuardian()) {
+        if (enemy != nullptr && enemy != enemyToDelete && enemy->getIsGuardian()) {
             hasProtectors = true;
         }
     }

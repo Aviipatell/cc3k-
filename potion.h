@@ -20,13 +20,17 @@ class Potion : public Item {
     PotionType potionType;
 
     public:
-        Potion(char potionType, char protectorType='0', bool needsProtection=false, bool isProtected=false);
+        Potion(bool needsProtection, char type);
 
-        char getSymbol() override;
+        std::string getEffect() const;
         void setPotionType(char potionType);
         PotionType getPotionType() const;
-        std::string getEffect() const;
+
+        char getSymbol() override;
         std::string useItem(Player* p) override;
 };
 
 #endif
+
+
+//  Potion(char potionType, char protectorType='0', bool needsProtection=false, bool isProtected=false);

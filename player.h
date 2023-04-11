@@ -10,17 +10,21 @@ class Player: public Character {
     protected:
         double gold;
         bool hasBarrierSuit;
+        bool hasCompass;
     // Add Player Inventory here
 
     public:
-        // Constructors // TODO: figure out another way if possible?
-        Player(int maxHealth=0, int attack=0, int defence=0, std::string race="");
+        // Constructors
+        Player(); // to enable StatusEffect Decorator
+        Player(int maxHealth, int attack, int defence, std::string race);
         // Setters
         void setPlayerGold(double gold);
         void setHasBarrierSuit(bool hasBarrierSuit);
+        void setHasCompass(bool hasCompass);
         // Getters
         int getPlayerGold() const;
         bool getHasBarrierSuit() const;
+        bool getHasCompass() const;
         char getSymbol() override;
 
         // Helpers
