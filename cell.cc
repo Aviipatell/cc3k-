@@ -67,8 +67,10 @@ void Cell::setEntity(Entity* e) {
         } else {
             setSymbol('.');
         }
+        setHasEntity(false);
     } else {
         setSymbol(e->getSymbol());
+        setHasEntity(true);
     }
 }
 

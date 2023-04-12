@@ -8,7 +8,7 @@
 #include "game.h"
 
 class Controller {
-    Game *g;
+    Game* g;
     GameMode mode;
     std::string floorPlanSrc;
     std::string msg;

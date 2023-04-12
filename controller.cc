@@ -63,7 +63,7 @@ void Controller::startGame() {
         std::cin >> raceSelect;
     }
 
-    Game* g = new Game{raceSelect-1, floorPlanSrc, mode, rng};
+    this->g = new Game{raceSelect-1, floorPlanSrc, mode, rng};
     printGame();
     std::cout << "GAME PRINTED???" << std::endl;
 }
@@ -83,7 +83,8 @@ void Controller::quitGame() {
 
 //TODO: need to implement
 void Controller::printGame() {
-    g->print();
+    if (g != nullptr) g->print();
+    // if (g == nullptr) std::cout << "null game" << std::endl;
 }
 
 bool Controller::playerAction(char dir1, char dir2, char actionType) {

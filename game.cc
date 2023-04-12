@@ -19,6 +19,7 @@
 #include "merchant.h"
 #include "phoenix.h"
 #include <sstream>
+#include <random>
 
 Game::Game(int raceSelect, std::string floorPlanSrc, GameMode mode, std::default_random_engine& rng) :
     floorPlanSrc{floorPlanSrc}, mode{mode}, rng{rng} {
@@ -63,6 +64,9 @@ void Game::generateNewFloor(){
     Cell* randomCell;
     std::vector<Cell*> cells = getEmptyCells();
 
+    std::cout << "generating entities.." << std::endl;
+    std::cout << cells.size() << std::endl;
+
     // If not testing, generate all entities ourselves
     if (mode != GameMode::Testing) {
 
@@ -73,6 +77,8 @@ void Game::generateNewFloor(){
         randomCell->setEntity(p);
         cells.erase(cells.begin() + index);
 
+        std::cout << "Generated player" << std::endl;
+
         // Staircase position
         int playerChamber = p->getCell()->getChamber();
         randomCell = getRandomEmptyCellFromRandomChamber(cells, playerChamber);
@@ -80,18 +86,32 @@ void Game::generateNewFloor(){
         randomCell->setIsStairCase(true);
         cells.erase(cells.begin() + index);
 
+        std::cout << "Generated staircase" << std::endl;
+
         // Potion generation + position
         int potionSpawnCap = 10;
         for (int potionCount = 0; potionCount < potionSpawnCap; ++potionCount) {
             std::uniform_int_distribution<unsigned> selectPotionType(0, 5);
             int potionType = selectPotionType(rng);
-            Entity* e = generateEntity(potionType);
+            std::cout << "Potion type: " << potionType << std::endl;
+            char entityType = potionType + '0';
+            Entity* e = generateEntity(entityType);
+            std::cout << "Items size: " << items.size() << std::endl;
             randomCell = getRandomEmptyCellFromRandomChamber(cells);
             index = getIndexOfCell(randomCell, cells);
+            if (e)  {
+                std::cout << "valid entity generated cell" << std::endl;
+            }
+            std::cout << "randomCellIndex: " << index << std::endl;
             e->setCell(randomCell);
+            std::cout << "testetgsgesgsg" << std::endl;
             randomCell->setEntity(e);
+            std::cout << "about to delete cell.." << std::endl;
             cells.erase(cells.begin() + index);
+            std::cout << "deleted cell.." << std::endl;
         }
+
+        std::cout << "Generated potions" << std::endl;
 
         // Gold generation + position
         int goldSpawnCap = 10;
@@ -114,6 +134,8 @@ void Game::generateNewFloor(){
             cells.erase(cells.begin() + index);
         }
 
+        std::cout << "Generated gold" << std::endl;
+
         // Barrier Suit generation + position
         if (currentFloor == barrierSuitFloor) {
             Entity* e = generateEntity('B');
@@ -128,11 +150,18 @@ void Game::generateNewFloor(){
         int enemySpawnCap = 20;
         int enemyCount = 0;
         for (Item* i : items) {
+            std::cout << enemyCount << std::endl;
             if (i->getNeedsProtection()) {
                 char protectorType = i->getProtectorType();
                 Entity* e = generateEntity(protectorType);
+                if (e == nullptr) {
+                    std::cout << "no entity" << std::endl;
+                }
                 Cell* itemCell = i->getCell();
                 randomCell = getRandomValidNeighbour(itemCell);
+                if (randomCell == nullptr) {
+                    std::cout << "no randomCell" << std::endl;
+                }
                 index = getIndexOfCell(randomCell, cells);
                 e->setCell(randomCell);
                 randomCell->setEntity(e);
@@ -152,6 +181,8 @@ void Game::generateNewFloor(){
             }
             if (enemyCount == enemySpawnCap) break;
         }
+
+        std::cout << "guardian enemies spawned" << std::endl;
 
         for (; enemyCount < enemySpawnCap; ++enemyCount) {
             std::uniform_int_distribution<unsigned> selectEnemyType(1, 18);
@@ -184,6 +215,8 @@ void Game::generateNewFloor(){
 
     }
 
+    std::cout << "Shit randomly generated properly.." << std::endl;
+
     int numEnemies = enemies.size();
     std::uniform_int_distribution<unsigned> selectCompassHolder(0, numEnemies-1);
     int compassIndex = selectCompassHolder(rng);
@@ -207,8 +240,8 @@ std::vector<Cell*> Game::getEmptyCellsFromChamber(std::vector<Cell*> cells, int 
 }
 
 void Game::loadFloorFromFile() {
-    int lowerBound = (currentFloor - 1) * 5;
-    int upperBound = (currentFloor * 5) - 1;
+    int lowerBound = (currentFloor - 1) * 25;
+    int upperBound = (currentFloor * 25) - 1;
     int lineCount = 0;
 
     std::cout << "Testing.." << std::endl;
@@ -230,10 +263,18 @@ void Game::loadFloorFromFile() {
         int row = lineCount - lowerBound;
         int column = 0;
         std::vector<Cell*> currentRow;
+        floor.push_back(currentRow);
         while (iss >> std::noskipws >> currentChar) {
+
+
+            std::cout << "Row: " << row << std::endl;
+            std::cout << "Col: " << column << std::endl;
+
             Cell* c = new Cell{row, column, currentChar};
+            std::cout << "Assigning chambers.." << std::endl;
             assignChambers(c, assignedChambers);
-            currentRow.push_back(c);
+            std::cout << "assigned chambers.." << std::endl;
+            floor[row].push_back(c);
             ++column;
 
             if (mode != GameMode::Testing) continue;
@@ -250,8 +291,15 @@ void Game::loadFloorFromFile() {
             }
         }
         // add row of cells to the floor
-        floor.push_back(currentRow);
+        // floor.push_back(currentRow);
         ++lineCount;
+    }
+
+    for (int i = 0; i < floor.size(); ++i){
+        for (int j = 0; j < floor[i].size(); ++j) {
+            Cell* c = floor[i][j];
+            std::cout << "Cell at " << i << "," << j << " is chamber:" << c->getChamber()  << std::endl;
+        }
     }
     source.close();
 
@@ -284,6 +332,9 @@ void Game::loadFloorFromFile() {
 }
 
 void Game::print() {
+
+    std::cout << "---- printing game ----" << std::endl;
+
     int sizeHeight = this->floor.size();
     int sizeWidth = this->floor[0].size();
     // ANSI colour codes
@@ -342,6 +393,8 @@ void Game::clearPlayerStatus() {
 }
 
 Entity* Game::generateEntity(char entityType) {
+    std::cout << "Generating entity.." << std::endl;
+    std::cout << entityType << std::endl;
     Enemy* enemy = nullptr;
     Item* item = nullptr;
     switch(entityType) {
@@ -395,6 +448,7 @@ Entity* Game::generateEntity(char entityType) {
             items.push_back(item);
             break;
         case '2':
+            std::cout << "Creating 2.." << std::endl;
             item = new Potion{false, entityType};
             items.push_back(item);
             break;
@@ -462,14 +516,19 @@ void Game::removeFloorEntities() {
 Cell* Game::getRandomEmptyCellFromRandomChamber(std::vector<Cell*> cells, int restrictedChamber) {
     std::uniform_int_distribution<unsigned> selectChamber(1, 5);
     int chamber = selectChamber(rng);
+    std::cout << chamber << std::endl;
     std::vector<Cell*> chamberCells = getEmptyCellsFromChamber(cells, chamber);
+    for (auto& i : chamberCells) {
+        std::cout << i->getPosition().row << " " << i->getPosition().column << std::endl;
+        break;
+    }
     while (chamberCells.size() == 0 || (restrictedChamber == chamber)) {
         chamber = selectChamber(rng);
         chamberCells = getEmptyCellsFromChamber(cells, chamber);
     }
     std::uniform_int_distribution<unsigned> selectCell(0, chamberCells.size() - 1);
     int cellIndex = selectCell(rng);
-    return cells[cellIndex];
+    return chamberCells[cellIndex];
 }
 
 int Game::getIndexOfCell(Cell* cell, std::vector<Cell*> cells) {
@@ -493,6 +552,7 @@ Cell* Game::getRandomValidNeighbour(Cell* cell) {
 }
 
 void Game::assignChambers(Cell* c, std::vector<int>& chambers) {
+    std::cout << "In assigning chambers.." << std::endl;
     Position cPos = c->getPosition();
     int cRow = cPos.row;
     int cColumn = cPos.column;
@@ -501,9 +561,17 @@ void Game::assignChambers(Cell* c, std::vector<int>& chambers) {
     if (!(cRow >= 1 && cColumn >= 1)) return;
     if (cType != FloorType::Tile) return;
 
+    std::cout << "Get chambers..." << std::endl;
+    std::cout << cRow << std::endl;
+    std::cout << cColumn << std::endl;
+
+    std::cout << "Floor size: " << floor.size() << std::endl;
+
     int topChamber = floor[cRow-1][cColumn]->getChamber();
     int leftChamber = floor[cRow][cColumn-1]->getChamber();
     int currentChamber;
+
+    std::cout << "Chambers retrieved.." << std::endl;
 
     if (topChamber != -1 && leftChamber != -1) {
         // top cell + left cell are valid cells with a chamber
@@ -609,6 +677,7 @@ void Game::movePlayer(Direction dir){
         currentCell->setEntity(nullptr);
         p->setCell(newCell);
     } else if (type == FloorType::Tile) {
+        std::cout << "testicles" << std::endl;
         // check entity
         if (newCell->getIsStairCase()) {
             generateNewFloor();
@@ -651,12 +720,12 @@ void Game::movePlayer(Direction dir){
             } else if (e->getSymbol() == 'P') {
                 // process potion
                 o << "PC moved " << direction << " and ran into a potion. Unable to move into potion, try using it instead. ";
-            } else {
-                // move
-                newCell->setEntity(p);
-                currentCell->setEntity(nullptr);
-                p->setCell(newCell);
             }
+        } else {
+            // move
+            newCell->setEntity(p);
+            currentCell->setEntity(nullptr);
+            p->setCell(newCell);
         }
     } else {
         int hitHeadDmg = 1;
@@ -841,6 +910,7 @@ void Game::usePotion(Direction dir) {
 }
 
 void Game::moveEnemies() {
+    std::cout << "move enemies is called" << std::endl;
     std::string curMessage = getGameMessage();
     std::ostringstream o;
 
@@ -849,11 +919,15 @@ void Game::moveEnemies() {
 
     for (int i = 0; i < sizeHeight; ++i) {
         for (int j = 0; j < sizeWidth; ++j) {
+            std::cout << "reached inner loop" << std::endl;
             if (floor[i][j]->getHasEntity()) {
                 bool playerIsNeighbour = false;
                 Enemy* enemy = dynamic_cast<Enemy*>(floor[i][j]->getEntity());
+                if (enemy == nullptr) std::cout << "enemy is nullptr" << std::endl;
                 if (enemy != nullptr) {
+                    std::cout << "enemy is not nullptr" << std::endl;
                     if (!(enemy->getHasAlreadyMoved())) {
+                        std::cout << "enemy has moved wtd" << std::endl;
                         std::vector<Cell*> enemyNeighbours = enemy->getCell()->getNeighbours();
                         for (Cell* cell : enemyNeighbours) {
                             if (cell->getSymbol() == '@') {
@@ -877,7 +951,9 @@ void Game::moveEnemies() {
                         }
                         if (!(enemy->getIsGuardian())) {
                             if (!(playerIsNeighbour)) {
+                                std::cout << "i like men" << std::endl;
                                 Cell* newCell = getRandomValidNeighbour(floor[i][j]);
+                                if (newCell == nullptr) std::cout << "newCell is nullptr" << std::endl;
                                 newCell->setEntity(enemy);
                                 floor[i][j]->setEntity(nullptr);
                                 enemy->setCell(newCell);
