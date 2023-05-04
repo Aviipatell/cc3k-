@@ -41,7 +41,7 @@ char Player::getSymbol() {
 // Helpers
 std::string Player::incrementPlayerGold(double gold) {
     std::ostringstream o;
-    o << "PC picked up " << gold << " gold.";
+    o << "PC picked up " << gold << " gold. ";
 
     // default: just add raw value of gold
     this->gold+= gold;

@@ -83,8 +83,8 @@ std::string Enemy::attack(Player* p) {
 
     int damage = std::ceil((100.0/(100+p->getDefence()))) * this->getAttack();
     if (p->getHasBarrierSuit()) damage = std::ceil(damage/2);
-    p->setHealth(damage);
+    p->setHealth(p->getHealth() - damage);
 
-    o << getSymbol() << " deals " << damage << " to " << p->getSymbol() << ".";
+    o << getSymbol() << " deals " << damage << " to " << p->getSymbol() << " (" << p->getHealth() << " HP)" << ". ";
     return o.str();
 }

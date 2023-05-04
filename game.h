@@ -45,6 +45,7 @@ class Game {
     std::vector<PotionType> knownPotions;
     bool isKnownPotion(PotionType pt);
 
+    bool playerAttacked = false;
     int currentFloor = 0;
     int barrierSuitFloor;
     bool isStairsVisible = false;
@@ -80,6 +81,7 @@ class Game {
     int getUnsetChamber(std::vector<int>& chambers);
     std::vector<Cell*> getEmptyCells();
     std::vector<Cell*> getEmptyCellsFromChamber(std::vector<Cell*> cells, int chamber);
+    bool isGameOver;
 
     public:
         // Constructor
@@ -92,7 +94,7 @@ class Game {
 
         // Getters
         std::string getGameMessage() const;
-
+        bool getGameOver();
         void attack(Direction dir);
         void usePotion(Direction dir);
         void movePlayer(Direction dir);

@@ -1,4 +1,5 @@
 #include "cell.h"
+#include <iostream>
 
 #include "entity.h"
 // Constructor
@@ -53,7 +54,6 @@ void Cell::setHasEntity(bool hasEntity) {
 void Cell::setEntity(Entity* e) {
     this->e = e;
     if (e == nullptr) {
-        char symbol;
         if (type == FloorType::Blank) {
             setSymbol(' ');
         } else if (type == FloorType::VerticalWall) {
@@ -69,6 +69,7 @@ void Cell::setEntity(Entity* e) {
         }
         setHasEntity(false);
     } else {
+        std::cout << "enemy set entity called" << std::endl;
         setSymbol(e->getSymbol());
         setHasEntity(true);
     }

@@ -1,6 +1,6 @@
 #include "gold.h"
 #include <sstream>
-
+#include <iostream>
 #include "player.h"
 
 Gold::Gold(bool needsProtection, char type) : Item{needsProtection} {
@@ -39,7 +39,7 @@ GoldType Gold::getGoldType() const {
 
 std::string Gold::useItem(Player* p) {
     std::ostringstream o;
-
+    std::cout << "useItem reached" << std::endl;
     o << p->incrementPlayerGold(amount);
     return o.str();
 }

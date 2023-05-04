@@ -22,7 +22,7 @@
 #include <random>
 
 Game::Game(int raceSelect, std::string floorPlanSrc, GameMode mode, std::default_random_engine& rng) :
-    floorPlanSrc{floorPlanSrc}, mode{mode}, rng{rng} {
+    floorPlanSrc{floorPlanSrc}, mode{mode}, rng{rng}, isGameOver{false} {
         this->p = generatePlayer(raceSelect);
         if (mode == GameMode::Normal || mode == GameMode::DLC) {
             this->floorPlanSrc = "SampleFloorPlan.txt";
@@ -227,6 +227,8 @@ void Game::generateNewFloor(){
     if (currentFloor == 1) {
         setGameMessage("Player has spawned.");
     }
+
+    assignNeighbours();
 }
 
 std::vector<Cell*> Game::getEmptyCellsFromChamber(std::vector<Cell*> cells, int chamber) {
@@ -331,41 +333,51 @@ void Game::loadFloorFromFile() {
     }
 }
 
+bool Game::getGameOver() {
+    return this->isGameOver;
+}
+
 void Game::print() {
 
-    std::cout << "---- printing game ----" << std::endl;
-
-    int sizeHeight = this->floor.size();
-    int sizeWidth = this->floor[0].size();
-    // ANSI colour codes
-    const std::string grey("\033[0;90m");
-    const std::string brown("\033[0;33m");
-    const std::string playerGreen("\e[1;92m");
-    const std::string floorGreen("\e[0;32m");
-    const std::string black("\033[0;30m");
-
-    // original colour
-    const std::string reset("\033[0m");
-
-    for (int i = 0; i < sizeHeight; ++i) {
-        for (int j = 0; j < sizeWidth; ++j) {
-            char symbol = floor[i][j]->getSymbol();
-            if (symbol == '.') std::cout << floorGreen;
-            else if (symbol == ' ') std::cout << black;
-            else if (symbol == '#') std::cout << grey;
-            else if (symbol == '@') std::cout << playerGreen;
-            else if (symbol == '|' || symbol == '-') std::cout << brown;
-            std::cout << symbol << reset;
-        }
-        std::cout << std::endl;
+    if (p->getHealth() <= 0) {
+        isGameOver = true;
     }
-    std::cout << "Race: " << p->getRace() << " ";
-    std::cout << "Gold: " << p->getPlayerGold() << " ";
-    std::cout << "Floor: " << getCurrentFloor() << std::endl;
-    std::cout << "HP: " << p->getHealth() << std::endl;
-    std::cout << "Atk: " << p->getAttack() << std::endl;
-    std::cout << "Def: " << p->getDefence() << std::endl;
-    std::cout << "Action: " << getGameMessage() << std::endl;
+    if (isGameOver) {
+        std::cout << "You Lost :(" << std::endl;
+    }
+    else {
+        int sizeHeight = this->floor.size();
+        int sizeWidth = this->floor[0].size();
+        // ANSI colour codes
+        const std::string grey("\033[0;90m");
+        const std::string brown("\033[0;33m");
+        const std::string playerGreen("\e[1;92m");
+        const std::string floorGreen("\e[0;32m");
+        const std::string black("\033[0;30m");
+
+        // original colour
+        const std::string reset("\033[0m");
+
+        for (int i = 0; i < sizeHeight; ++i) {
+            for (int j = 0; j < sizeWidth; ++j) {
+                char symbol = floor[i][j]->getSymbol();
+                if (symbol == '.') std::cout << floorGreen;
+                else if (symbol == ' ') std::cout << black;
+                else if (symbol == '#') std::cout << grey;
+                else if (symbol == '@') std::cout << playerGreen;
+                else if (symbol == '|' || symbol == '-') std::cout << brown;
+                std::cout << symbol << reset;
+            }
+            std::cout << std::endl;
+        }
+        std::cout << "Race: " << p->getRace() << " ";
+        std::cout << "Gold: " << p->getPlayerGold() << " ";
+        std::cout << "Floor: " << getCurrentFloor() << std::endl;
+        std::cout << "HP: " << p->getHealth() << std::endl;
+        std::cout << "Atk: " << p->getAttack() << std::endl;
+        std::cout << "Def: " << p->getDefence() << std::endl;
+        std::cout << "Action: " << getGameMessage() << std::endl;
+    }
 }
 
 Player* Game::generatePlayer(int playerType) {
@@ -541,10 +553,12 @@ int Game::getIndexOfCell(Cell* cell, std::vector<Cell*> cells) {
 Cell* Game::getRandomValidNeighbour(Cell* cell) {
     std::vector<Cell*> validNeighbours;
     for (Cell* c : cell->getNeighbours()) {
-        if (c->getType() == FloorType::Tile && !c->getHasEntity() && !c->getIsStairCase()) {
+        std::cout << c->getHasEntity() << ' ' << c->getIsStairCase() << std::endl;
+        if (c->getType() == FloorType::Tile && (!(c->getHasEntity())) && (!(c->getIsStairCase()))) {
                 validNeighbours.push_back(c);
         }
     }
+    std::cout << validNeighbours.size() << std::endl;
     if (validNeighbours.size() == 0) return nullptr;
     std::uniform_int_distribution<unsigned> selectNeighbour(0, validNeighbours.size() - 1);
     int index = selectNeighbour(rng);
@@ -677,28 +691,28 @@ void Game::movePlayer(Direction dir){
         currentCell->setEntity(nullptr);
         p->setCell(newCell);
     } else if (type == FloorType::Tile) {
-        std::cout << "testicles" << std::endl;
+        std::cout << "tile" << std::endl;
         // check entity
         if (newCell->getIsStairCase()) {
             generateNewFloor();
             o << "PC moved " << direction << " and went down the staircase. PC is on level " << currentFloor<< ". ";
-        } else if (currentCell->getHasEntity()) {
+        } else if (newCell->getHasEntity()) {
             // if staircase, move player to that position -> generateNewFloor (check random player)
             Entity* e = newCell->getEntity();
             if (e->getSymbol() == 'C') {
                 Item* i = dynamic_cast<Item*>(e);
-                i->useItem(p);
+                o << i->useItem(p);
                 deleteEntity(i);
                 newCell->setEntity(p);
                 currentCell->setEntity(nullptr);
                 p->setCell(newCell);
             } else if (e->getSymbol() == 'G') {
                 // process gold
-                Item* i = dynamic_cast<Item*>(i);
+                Item* i = dynamic_cast<Item*>(e);
                 if (i->getIsProtected()) {
                     o << "Gold Hoard is still protected. Can't pick it up. ";
                 } else {
-                    i->useItem(p);
+                    o << i->useItem(p);
                     deleteEntity(i);
                     newCell->setEntity(p);
                     currentCell->setEntity(nullptr);
@@ -710,7 +724,7 @@ void Game::movePlayer(Direction dir){
                 if (i->getIsProtected()) {
                     o << "Barrier Suit is still protected. Can't pick it up. ";
                 } else {
-                    i->useItem(p);
+                    o << i->useItem(p);
                     deleteEntity(i);
                     o << "PC equipped barrier suit. ";
                     newCell->setEntity(p);
@@ -723,12 +737,17 @@ void Game::movePlayer(Direction dir){
             }
         } else {
             // move
+            std::cout << "moved" << std::endl;
             newCell->setEntity(p);
+            std::cout << "new cell entity set" << std::endl;
             currentCell->setEntity(nullptr);
+            std::cout << "cur cell entity set" << std::endl;
             p->setCell(newCell);
+            std::cout << "players cell set to new cell" << std::endl;
         }
     } else {
         int hitHeadDmg = 1;
+        p->setHealth(p->getHealth() - hitHeadDmg);
         o << "PC tried moving " << direction << " and ran into a wall. PC lost " << hitHeadDmg << " HP. ";
     }
 
@@ -805,7 +824,7 @@ void Game::attack(Direction dir) {
         }
         std::string attackMessage = p->attack(enemy);
 
-        if(enemy->getHealth() == 0){
+        if(enemy->getHealth() <= 0){
             deleteEntity(enemy);
         }
 
@@ -814,7 +833,9 @@ void Game::attack(Direction dir) {
         o << "PC is hallucinating, you WHIFFED!. ";
     }
     setGameMessage(o.str());
+    playerAttacked = true;
     moveEnemies();
+    playerAttacked = false;
 }
 
 void Game::setMerchantsHostile() {
@@ -854,7 +875,7 @@ void Game::assignNeighbours() {
             }
             if (j - 1 > 0) cell_neighbours.push_back(this->floor[i][j-1]);
             if (j + 1 < sizeWidth) cell_neighbours.push_back(this->floor[i][j+1]);
-
+            std::cout << cell_neighbours.size() << std::endl;
             floor[i][j]->setNeighbours(cell_neighbours);
         }
     }
@@ -894,6 +915,7 @@ void Game::usePotion(Direction dir) {
     std::ostringstream o;
 
     if (potion != nullptr) {
+        std::cout << "potion is valid" << std::endl;
         std::string potionMessage = potion->useItem(p);
         PotionType potionType = potion->getPotionType();
         bool isKnown = false;
@@ -902,12 +924,78 @@ void Game::usePotion(Direction dir) {
         }
         if (!(isKnown)) knownPotions.push_back(potionType);
         o << potionMessage << " ";
+        std::cout << o.str() << std::endl;
+        deleteEntity(potion);
     } else {
         o << "PC is hallucinating, there is no potion. ";
     }
     setGameMessage(o.str());
     moveEnemies();
 }
+
+// void Game::moveEnemies() {
+//     std::cout << "move enemies is called" << std::endl;
+//     std::string curMessage = getGameMessage();
+//     std::ostringstream o;
+
+//     int sizeHeight = this->floor.size();
+//     int sizeWidth = this->floor[0].size();
+
+//     for (int i = 0; i < sizeHeight; ++i) {
+//         for (int j = 0; j < sizeWidth; ++j) {
+//             std::cout << "reached inner loop" << std::endl;
+//             if (floor[i][j]->getHasEntity()) {
+//                 bool playerIsNeighbour = false;
+//                 Enemy* enemy = dynamic_cast<Enemy*>(floor[i][j]->getEntity());
+//                 if (enemy == nullptr) std::cout << "enemy is nullptr" << std::endl;
+//                 if (enemy != nullptr) {
+//                     std::cout << "enemy is not nullptr" << std::endl;
+//                     if (!(enemy->getHasAlreadyMoved())) {
+//                         std::cout << "enemy has moved wtd" << std::endl;
+//                         std::vector<Cell*> enemyNeighbours = enemy->getCell()->getNeighbours();
+//                         for (Cell* cell : enemyNeighbours) {
+//                             if (cell->getSymbol() == '@') {
+//                                 playerIsNeighbour = true;
+//                                 if (enemy->getIsHostile()) {
+//                                     enemy->attack(p);
+//                                 } else {
+//                                     if (enemy->getIsGuardian()) {
+//                                         bool shouldAttack = false;
+//                                         std::vector<Item*> guardedItems = enemy->getGuardedItems();
+//                                         for (Item* item : guardedItems) {
+//                                             if (item->getCell()->isNeighbour(cell)) {
+//                                                 shouldAttack = true;
+//                                             }
+//                                         }
+//                                         if (shouldAttack) enemy->attack(p);
+//                                     }
+//                                 }
+//                                 break;
+//                             }
+//                         }
+//                         if (!(enemy->getIsGuardian())) {
+//                             if (!(playerIsNeighbour)) {
+//                                 std::cout << "i like men" << std::endl;
+//                                 Cell* newCell = getRandomValidNeighbour(floor[i][j]);
+//                                 if (newCell == nullptr) std::cout << "newCell is nullptr" << std::endl;
+//                                 newCell->setEntity(enemy);
+//                                 floor[i][j]->setEntity(nullptr);
+//                                 enemy->setCell(newCell);
+//                             }
+//                         }
+//                     } else {
+//                         continue;
+//                     }
+//                 }
+//             }
+//         }
+//     }
+
+//     // reset movement
+//     for (Enemy* e : enemies) {
+//         e->setHasAlreadyMoved(false);
+//     }
+// }
 
 void Game::moveEnemies() {
     std::cout << "move enemies is called" << std::endl;
@@ -919,7 +1007,7 @@ void Game::moveEnemies() {
 
     for (int i = 0; i < sizeHeight; ++i) {
         for (int j = 0; j < sizeWidth; ++j) {
-            std::cout << "reached inner loop" << std::endl;
+            // std::cout << "Checking cell at (" << i << ", " << j << ")" << std::endl; // Add this line
             if (floor[i][j]->getHasEntity()) {
                 bool playerIsNeighbour = false;
                 Enemy* enemy = dynamic_cast<Enemy*>(floor[i][j]->getEntity());
@@ -932,18 +1020,18 @@ void Game::moveEnemies() {
                         for (Cell* cell : enemyNeighbours) {
                             if (cell->getSymbol() == '@') {
                                 playerIsNeighbour = true;
-                                if (enemy->getIsHostile()) {
-                                    enemy->attack(p);
+                                if (enemy->getIsHostile() && playerAttacked) {
+                                    o << enemy->attack(p);
                                 } else {
                                     if (enemy->getIsGuardian()) {
                                         bool shouldAttack = false;
                                         std::vector<Item*> guardedItems = enemy->getGuardedItems();
                                         for (Item* item : guardedItems) {
-                                            if (item->getCell()->isNeighbour(cell)) {
+                                            if (item->getCell()->isNeighbour(cell) && playerAttacked) {
                                                 shouldAttack = true;
                                             }
                                         }
-                                        if (shouldAttack) enemy->attack(p);
+                                        if (shouldAttack) o << enemy->attack(p);
                                     }
                                 }
                                 break;
@@ -951,12 +1039,14 @@ void Game::moveEnemies() {
                         }
                         if (!(enemy->getIsGuardian())) {
                             if (!(playerIsNeighbour)) {
-                                std::cout << "i like men" << std::endl;
+                                std::cout << "not a guardian, player is not a neighbour" << std::endl;
                                 Cell* newCell = getRandomValidNeighbour(floor[i][j]);
                                 if (newCell == nullptr) std::cout << "newCell is nullptr" << std::endl;
-                                newCell->setEntity(enemy);
-                                floor[i][j]->setEntity(nullptr);
-                                enemy->setCell(newCell);
+                                if (newCell != nullptr) {
+                                    newCell->setEntity(enemy);
+                                    floor[i][j]->setEntity(nullptr);
+                                    enemy->setCell(newCell);
+                                }
                             }
                         }
                     } else {
@@ -971,6 +1061,7 @@ void Game::moveEnemies() {
     for (Enemy* e : enemies) {
         e->setHasAlreadyMoved(false);
     }
+    setGameMessage(curMessage + o.str());
 }
 
 
@@ -980,6 +1071,9 @@ void Game::deleteEntity(Entity* e) {
         Item* itemToDelete = dynamic_cast<Item*>(e);
         for (int i = 0; i < items.size(); ++i) {
             if (items[i] == itemToDelete) {
+                items[i]->getCell()->setHasEntity(false);
+                items[i]->getCell()->setFloorType('.');
+                items[i]->getCell()->setEntity(nullptr);
                 items.erase(items.begin() + i);
                 break;
             }
@@ -989,6 +1083,9 @@ void Game::deleteEntity(Entity* e) {
         Enemy* enemyToDelete = dynamic_cast<Enemy*>(e);
         for (int i = 0; i < enemies.size(); ++i) {
             if (enemies[i] == enemyToDelete) {
+                enemies[i]->getCell()->setHasEntity(false);
+                enemies[i]->getCell()->setFloorType('.');
+                enemies[i]->getCell()->setEntity(nullptr);
                 enemies.erase(enemies.begin() + i);
                 break;
             }

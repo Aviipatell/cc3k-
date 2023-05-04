@@ -61,7 +61,7 @@ std::string Potion::useItem(Player* p) {
         msg = "PC uses BA.";
     } else if (potionType == PotionType::BDPotion) {
         p = new BDStatus{p};
-        msg = "PC uses BA.";
+        msg = "PC uses BD.";
     } else if (potionType == PotionType::PHPotion) {
         p = new PHStatus{p};
         msg = "PC uses PH.";

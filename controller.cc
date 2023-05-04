@@ -65,7 +65,6 @@ void Controller::startGame() {
 
     this->g = new Game{raceSelect-1, floorPlanSrc, mode, rng};
     printGame();
-    std::cout << "GAME PRINTED???" << std::endl;
 }
 
 void Controller::restartGame() {
@@ -157,7 +156,7 @@ Direction Controller::getValidDirection(char dir1, char dir2){
 }
 
 bool Controller::isGameOver() {
-
+    return g->getGameOver();
 }
 
 std::string Controller::getMsg() {
