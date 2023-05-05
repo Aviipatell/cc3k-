@@ -62,6 +62,7 @@ void Game::generateNewFloor(){
 
     int index;
     Cell* randomCell;
+    assignNeighbours();
     std::vector<Cell*> cells = getEmptyCells();
 
     std::cout << "generating entities.." << std::endl;
@@ -158,6 +159,7 @@ void Game::generateNewFloor(){
                     std::cout << "no entity" << std::endl;
                 }
                 Cell* itemCell = i->getCell();
+                std::cout << itemCell->getPosition().row << ", " << itemCell->getPosition().column << std::endl;
                 randomCell = getRandomValidNeighbour(itemCell);
                 if (randomCell == nullptr) {
                     std::cout << "no randomCell" << std::endl;
@@ -227,8 +229,6 @@ void Game::generateNewFloor(){
     if (currentFloor == 1) {
         setGameMessage("Player has spawned.");
     }
-
-    assignNeighbours();
 }
 
 std::vector<Cell*> Game::getEmptyCellsFromChamber(std::vector<Cell*> cells, int chamber) {
@@ -552,6 +552,8 @@ int Game::getIndexOfCell(Cell* cell, std::vector<Cell*> cells) {
 
 Cell* Game::getRandomValidNeighbour(Cell* cell) {
     std::vector<Cell*> validNeighbours;
+    // std::cout << cell->getPosition().row << ' ' << cell->getPosition().column << std::endl;
+    std::cout << cell->getNeighbours().size() << std::endl;
     for (Cell* c : cell->getNeighbours()) {
         std::cout << c->getHasEntity() << ' ' << c->getIsStairCase() << std::endl;
         if (c->getType() == FloorType::Tile && (!(c->getHasEntity())) && (!(c->getIsStairCase()))) {
