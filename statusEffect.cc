@@ -8,15 +8,15 @@ StatusEffect::~StatusEffect() {
     delete next;
 }
 
-int StatusEffect::getAttack() {
-    int attack = next->getAttack();
-    return attack;
-}
+// int StatusEffect::getAttack() {
+//     int attack = next->getAttack();
+//     return attack;
+// }
 
-int StatusEffect::getDefence() {
-    int defence = next->getDefence();
-    return defence;
-}
+// int StatusEffect::getDefence() {
+//     int defence = next->getDefence();
+//     return defence;
+// }
 
 StatusDuration StatusEffect::getStatusDuration() const {
     return this->duration;

@@ -71,6 +71,7 @@ std::string Potion::useItem(Player* p) {
     } else {
         p = new WDStatus{p};
     }
+
     return msg;
 }
 

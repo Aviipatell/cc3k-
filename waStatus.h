@@ -6,7 +6,7 @@
 class WAStatus : public StatusEffect {
     public:
         WAStatus(Player* next, StatusDuration duration=StatusDuration::Temporary);
-        int getAttack() override;
+        // int getAttack() override;
 };
 
 #endif

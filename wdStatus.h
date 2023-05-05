@@ -6,7 +6,7 @@
 class WDStatus : public StatusEffect {
     public:
         WDStatus(Player* next, StatusDuration duration=StatusDuration::Temporary);
-        int getDefence() override;
+        // int getDefence() override;
 };
 
 #endif

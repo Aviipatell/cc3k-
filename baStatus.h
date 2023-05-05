@@ -6,7 +6,7 @@
 class BAStatus : public StatusEffect {
     public:
         BAStatus(Player* next, StatusDuration duration=StatusDuration::Temporary);
-        int getAttack() override;
+        // int getAttack() override;
 };
 
 #endif

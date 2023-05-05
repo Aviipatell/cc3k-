@@ -18,8 +18,8 @@ class StatusEffect : public Player {
         // Destructor
         ~StatusEffect();
         // Helpers
-        int getAttack() override;
-        int getDefence() override;
+        // int getAttack() override;
+        // int getDefence() override;
         StatusDuration getStatusDuration() const;
         Player* getNext() const;
 };
