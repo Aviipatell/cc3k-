@@ -5,6 +5,7 @@
 #include <cmath>
 #include <fstream>
 #include <algorithm>
+#include "floor_generation.h"
 
 void dfs(const std::vector<std::vector<char>> &floor_map, int row, int col, std::vector<std::pair<int, int>> &corner_tiles, std::vector<std::vector<bool>> &visited) {
     if (row < 0 || col < 0 || row >= floor_map.size() || col >= floor_map[0].size() || floor_map[row][col] != '.' || visited[row][col]) {
@@ -63,8 +64,6 @@ const char HORIZONTAL_WALL = '-';
 const char FLOOR = '.';
 const char PASSAGE = '#';
 const char EMPTY = ' ';
-
-enum quad { FIRST, SECOND, THIRD, FOURTH, MIDDLE };
 
 void drawLine(int x0, int y0, int x1, int y1, std::vector<std::vector<char>>& map) {
     int dx = std::abs(x1 - x0);
@@ -245,38 +244,40 @@ void generateFloor(std::vector<std::vector<char>> &floor, std::vector<std::pair<
     }
 }
 
-int main() {
-    std::vector<std::vector<char>> floor(HEIGHT, std::vector<char>(WIDTH, EMPTY));
-    std::vector<std::pair<int, int>> points = generateRandomPoints(2, 30, 2, 9);
-    std::vector<std::pair<int, int>> points2 = generateRandomPoints(52, 76, 17, 22);
-    std::vector<std::pair<int, int>> points3 = generateRandomPoints(2, 30, 17, 22);
-    std::vector<std::pair<int, int>> points4 = generateRandomPoints(52, 76, 2, 9);
-    std::vector<std::pair<int, int>> points5 = generateRandomPoints(31, 49, 11, 15);
 
-    generateFloor(floor, points);
-    generateFloor(floor, points2);
-    generateFloor(floor, points3);
-    generateFloor(floor, points4);
-    generateFloor(floor, points5);
 
-    for (int y = 0; y < HEIGHT; ++y) {
-        for (int x = 0; x < WIDTH; ++x) {
-            if (y == 0 || y == HEIGHT - 1) {
-                floor[y][x] = HORIZONTAL_WALL;
-            }
-            if (x == 0 || x == WIDTH - 1) {
-                floor[y][x] = WALL;
-            }
-        }
-    }
+// int main() {
+//     std::vector<std::vector<char>> floor(HEIGHT, std::vector<char>(WIDTH, EMPTY));
+//     std::vector<std::pair<int, int>> points = generateRandomPoints(2, 30, 2, 9);
+//     std::vector<std::pair<int, int>> points2 = generateRandomPoints(52, 76, 17, 22);
+//     std::vector<std::pair<int, int>> points3 = generateRandomPoints(2, 30, 17, 22);
+//     std::vector<std::pair<int, int>> points4 = generateRandomPoints(52, 76, 2, 9);
+//     std::vector<std::pair<int, int>> points5 = generateRandomPoints(31, 49, 11, 15);
 
-    std::ofstream output_file("generated_floor.txt");
+//     generateFloor(floor, points);
+//     generateFloor(floor, points2);
+//     generateFloor(floor, points3);
+//     generateFloor(floor, points4);
+//     generateFloor(floor, points5);
 
-    for (const auto &row : floor) {
-        for (const auto &col : row) {
-                output_file << col;
-        }
-        output_file << std::endl;
-    }
-    return 0;
-}
+//     for (int y = 0; y < HEIGHT; ++y) {
+//         for (int x = 0; x < WIDTH; ++x) {
+//             if (y == 0 || y == HEIGHT - 1) {
+//                 floor[y][x] = HORIZONTAL_WALL;
+//             }
+//             if (x == 0 || x == WIDTH - 1) {
+//                 floor[y][x] = WALL;
+//             }
+//         }
+//     }
+
+//     std::ofstream output_file("generated_floor.txt");
+
+//     for (const auto &row : floor) {
+//         for (const auto &col : row) {
+//                 output_file << col;
+//         }
+//         output_file << std::endl;
+//     }
+//     return 0;
+// }

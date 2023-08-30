@@ -25,7 +25,7 @@ Game::Game(int raceSelect, std::string floorPlanSrc, GameMode mode, std::default
     floorPlanSrc{floorPlanSrc}, mode{mode}, rng{rng}, isGameOver{false} {
         this->p = generatePlayer(raceSelect);
         if (mode == GameMode::Normal || mode == GameMode::DLC) {
-            this->floorPlanSrc = "SampleFloorPlan.txt";
+            this->floorPlanSrc = "final_generated_floor.txt";
         }
         // Generate BS Floor
         std::uniform_int_distribution<unsigned> selectBSFloor(1, 5);

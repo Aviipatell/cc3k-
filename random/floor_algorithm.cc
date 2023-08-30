@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <random>
 #include <string>
+#include "floor_generation.h"
 
 bool isPointInQuadrant(std::vector<std::pair<int, int>> &quadrant, int x, int y) {
     return (x >= quadrant[0].first && x <= quadrant[1].first &&
@@ -351,10 +352,42 @@ void makePaths(std::vector<std::vector<std::pair<int, int>>> &minMaxCoords, std:
 
 
 int main() {
+    std::vector<std::vector<char>> floor(HEIGHT, std::vector<char>(WIDTH, EMPTY));
+    std::vector<std::pair<int, int>> points = generateRandomPoints(2, 30, 2, 9);
+    std::vector<std::pair<int, int>> points2 = generateRandomPoints(52, 76, 17, 22);
+    std::vector<std::pair<int, int>> points3 = generateRandomPoints(2, 30, 17, 22);
+    std::vector<std::pair<int, int>> points4 = generateRandomPoints(52, 76, 2, 9);
+    std::vector<std::pair<int, int>> points5 = generateRandomPoints(31, 49, 11, 15);
+
+    generateFloor(floor, points);
+    generateFloor(floor, points2);
+    generateFloor(floor, points3);
+    generateFloor(floor, points4);
+    generateFloor(floor, points5);
+
+    for (int y = 0; y < HEIGHT; ++y) {
+        for (int x = 0; x < WIDTH; ++x) {
+            if (y == 0 || y == HEIGHT - 1) {
+                floor[y][x] = HORIZONTAL_WALL;
+            }
+            if (x == 0 || x == WIDTH - 1) {
+                floor[y][x] = WALL;
+            }
+        }
+    }
+
+    std::ofstream output_file("generated_floor.txt");
+
+    for (const auto &row : floor) {
+        for (const auto &col : row) {
+                output_file << col;
+        }
+        output_file << std::endl;
+    }
     std::string filename = "generated_floor.txt";
 
-    std::vector<std::string> floor = read_map_from_file(filename);
-    std::vector<std::vector<std::pair<int, int>>> chamber_coordinates = detect_chamber_corner_tiles(floor);
+    std::vector<std::string> room = read_map_from_file(filename);
+    std::vector<std::vector<std::pair<int, int>>> chamber_coordinates = detect_chamber_corner_tiles(room);
 
     std::vector<std::vector<std::pair<int, int>>> minMaxCoords;
 
@@ -373,12 +406,12 @@ int main() {
         minMaxCoords.push_back(coords);
     }
 
-    makePaths(minMaxCoords, floor);
+    makePaths(minMaxCoords, room);
 
-    std::ofstream output_file("../final_generated_floor.txt");
+    std::ofstream output_file2("../final_generated_floor.txt");
 
-    for (const auto &row : floor) {
-        output_file << row << std::endl;
+    for (const auto &row : room) {
+        output_file2 << row << std::endl;
     }
 
 }
