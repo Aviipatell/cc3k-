@@ -67,6 +67,7 @@ class Game {
     Cell* getRandomValidNeighbour(Cell* cell);
     Cell* overrideRandomValidNeighbour(Cell* c);
 
+
     std::string getDirectionValue(Direction dir);
     std::string scoutNeighboursForItems(Cell* currentCell);
     void setMerchantsHostile();
